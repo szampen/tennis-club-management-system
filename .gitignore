@@ -4,6 +4,7 @@ target/
 !**/src/test/**/target/
 .kotlin
 
+
 ### IntelliJ IDEA ###
 .idea/
 out/
@@ -68,3 +69,6 @@ logs/
 *.zip
 *.tar.gz
 *.rar
+
+#application.properties
+src/main/resources/application.properties
