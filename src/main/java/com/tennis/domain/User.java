@@ -17,17 +17,17 @@ public abstract class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
-        // id - to reconsider how is it supposed to work (database-wise etc.)
+        //TODO id - to reconsider how is it supposed to work (database-wise etc.)
     }
 
     public abstract boolean canManageCourts();
 
     public Long getId(){
-        return this.id;
+        return id;
     }
 
     public String getEmail(){
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email){
@@ -35,7 +35,7 @@ public abstract class User {
     }
 
     public String getPassword(){
-        return this.password;
+        return password;
     }
 
     public void setPassword(String password){
@@ -43,7 +43,7 @@ public abstract class User {
     }
 
     public String getFirstName(){
-        return this.firstName;
+        return firstName;
     }
 
     public void setFirstName(String firstName){
@@ -51,7 +51,7 @@ public abstract class User {
     }
 
     public String getLastName(){
-        return this.lastName;
+        return lastName;
     }
 
     public void setLastName(String lastName){
@@ -59,7 +59,7 @@ public abstract class User {
     }
 
     public String getPhoneNumber(){
-        return this.phoneNumber;
+        return phoneNumber;
     }
 
     public void setPhoneNumber(String phoneNumber){
@@ -67,7 +67,7 @@ public abstract class User {
     }
 
     public UserType getUserType(){
-        return this.userType;
+        return userType;
     }
 
     public void setUserType(UserType userType){

@@ -27,7 +27,7 @@ public class Player extends User{
     }
 
     public int getRankingPoints(){
-        return this.rankingPoints;
+        return rankingPoints;
     }
 
     public void setRankingPoints(int points){
