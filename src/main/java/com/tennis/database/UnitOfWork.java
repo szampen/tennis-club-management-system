@@ -88,7 +88,7 @@ public class UnitOfWork {
         }
     }
 
-    private void rollback(){
+    public void rollback(){
         try{
             if(connection != null && !connection.isClosed()){
                 connection.rollback();

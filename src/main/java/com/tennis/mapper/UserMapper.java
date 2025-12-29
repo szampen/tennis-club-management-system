@@ -133,5 +133,25 @@ public class UserMapper {
         return null;
     }
 
+    public User findUserbyEmail(String email, Connection connection, IdentityMap identityMap) throws SQLException{
+        String sql = "SELECT * FROM users WHERE email = ?".formatted();
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1, email);
+
+        ResultSet set = statement.executeQuery();
+
+        if(set.next()){
+            Long id = set.getLong("id");
+
+            if(identityMap.contains(User.class,id)){
+                return identityMap.get(User.class,id);
+            }
+
+            User user = mapResultSetToUser(set);
+            identityMap.put(User.class, id, user);
+            return user;
+        }
+        return null;
+    }
     //TODO: find by email/name etc. if needed
 }
