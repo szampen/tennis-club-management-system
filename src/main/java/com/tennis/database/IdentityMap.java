@@ -8,23 +8,19 @@ import java.util.Map;
  */
 
 public class IdentityMap {
-    private Map<String, Object> map = new HashMap<>();
-
-    private <T> String createKey(Class<T> class_, Long id){
-        return class_.getSimpleName() + "#" + id; //ex. User#5
-    }
+    private Map<IdentityKey, Object> map = new HashMap<>();
 
     public <T> void put(Class<T> class_, Long id, T object){
-        map.put(createKey(class_,id),object);
+        map.put(new IdentityKey(class_,id), object);
     }
 
     @SuppressWarnings("unchecked")
     public <T> T get(Class<T> class_, Long id){
-        return (T) map.get(createKey(class_,id));
+        return (T) map.get(new IdentityKey(class_,id));
     }
 
     public <T> boolean contains(Class<T> class_, Long id){
-        return map.containsKey(createKey(class_,id));
+        return map.containsKey(new IdentityKey(class_, id));
     }
 
     public void clear(){
