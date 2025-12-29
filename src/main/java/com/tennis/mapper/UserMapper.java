@@ -14,8 +14,9 @@ import java.util.List;
     Maps domain model User into database
  */
 
-public class UserMapper {
+public class UserMapper implements DataMapper<User>{
 
+    @Override
     public Long insert(User user, Connection connection) throws SQLException {
         String sql = "INSERT INTO users (email, password, first_name, last_name, phone_number, user_type, ranking_points) VALUES (?, ?, ?, ?, ?, ?, ?)".formatted();
 
@@ -47,6 +48,7 @@ public class UserMapper {
         throw new SQLException("Fetching user id failed.");
     }
 
+    @Override
     public void update(User user, Connection connection) throws SQLException{
         String sql = "UPDATE users SET email = ?, password = ?, first_name = ?, last_name = ?, phone_number = ?, ranking_points = ? WHERE id = ?".formatted();
 
@@ -68,10 +70,11 @@ public class UserMapper {
         statement.executeUpdate();
     }
 
-    public void delete(Long id, Connection connection) throws SQLException{
+    @Override
+    public void delete(User user, Connection connection) throws SQLException{
         String sql = "DELETE FROM users WHERE id = ?".formatted();
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setLong(1,id);
+        statement.setLong(1,user.getId());
         statement.executeUpdate();
     }
 
