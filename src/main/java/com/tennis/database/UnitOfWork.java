@@ -1,7 +1,11 @@
 package com.tennis.database;
 
+import com.tennis.mapper.DataMapper;
+
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /*
@@ -10,25 +14,25 @@ import java.util.Set;
  */
 public class UnitOfWork {
     private Connection connection; // database connection
-    private IdentityMap identityMap;
 
     // sets of states - INSERT/UPDATE/DELETE
     private Set<Object> newObjects = new HashSet<>();
     private Set<Object> dirtyObjects = new HashSet<>();
     private Set<Object> deletedObjects = new HashSet<>();
 
+    private Map<Class<?>, DataMapper<?>> mappers = new HashMap<>();
+
     public UnitOfWork() throws Exception{
         this.connection = DatabaseConnection.getConnection();
         this.connection.setAutoCommit(false); // disabling autocommit allows UoW to work properly
-        this.identityMap = new IdentityMap();
     }
 
     public Connection getConnection(){
         return connection;
     }
 
-    public IdentityMap getIdentityMap(){
-        return identityMap;
+    public <T> void registerMapper(Class<T> class_, DataMapper<T> mapper){
+        mappers.put(class_,mapper);
     }
 
     // INSERT
@@ -94,8 +98,7 @@ public class UnitOfWork {
                 connection.rollback();
             }
         } catch (Exception e){
-            System.err.println("Error during rollback: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Error during rollback: " + e.getMessage());
         } finally {
             newObjects.clear();
             dirtyObjects.clear();
@@ -110,21 +113,31 @@ public class UnitOfWork {
                 DatabaseConnection.returnConnection(connection);
             }
         } catch (Exception e){
-            System.err.println("Error closing connection " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Error closing connection " + e.getMessage());
         }
     }
 
-    // TODO: PLACEHOLDERS
     private void insertObject(Object obj) throws Exception{
-        System.out.println("INSERT");
+        @SuppressWarnings("unchecked")
+        DataMapper<Object> mapper = (DataMapper<Object>) mappers.get(obj.getClass());
+        if(mapper == null) throw new IllegalArgumentException("No mapper registered for: " + obj.getClass());
+
+        Long id = mapper.insert(obj,connection);
     }
 
     private void updateObject(Object obj) throws Exception{
-        System.out.println("UPDATE");
+        @SuppressWarnings("unchecked")
+        DataMapper<Object> mapper = (DataMapper<Object>) mappers.get(obj.getClass());
+        if(mapper == null) throw new IllegalArgumentException("No mapper registered for: " + obj.getClass());
+
+        mapper.update(obj, connection);
     }
 
     private void deleteObject(Object obj) throws Exception{
-        System.out.println("DELETION");
+        @SuppressWarnings("unchecked")
+        DataMapper<Object> mapper = (DataMapper<Object>) mappers.get(obj.getClass());
+        if(mapper == null) throw new IllegalArgumentException("No mapper registered for: " + obj.getClass());
+
+        mapper.delete(obj, connection);
     }
 }
