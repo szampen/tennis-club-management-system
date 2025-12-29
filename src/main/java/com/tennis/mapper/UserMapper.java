@@ -14,6 +14,7 @@ import java.util.List;
     Maps domain model User into database
  */
 
+//TODO: findUserbyId and Email - REMEMBER TO CHECK IF IDENTITYMAP NECESSARY
 public class UserMapper implements DataMapper<User>{
 
     @Override
@@ -117,10 +118,13 @@ public class UserMapper implements DataMapper<User>{
         return users;
     }
 
-    public User findUserById(Long id, Connection connection, IdentityMap identityMap) throws SQLException{
+    public User findUserById(Long id, Connection connection) throws SQLException{
+        /*
         if(identityMap.contains(User.class,id)){
             return identityMap.get(User.class,id);
         }
+
+        */
 
         String sql = "SELECT * FROM users WHERE id = ?".formatted();
         PreparedStatement statement = connection.prepareStatement(sql);
@@ -130,13 +134,13 @@ public class UserMapper implements DataMapper<User>{
 
         if(rs.next()){
             User user = mapResultSetToUser(rs);
-            identityMap.put(User.class,id,user);
+            //identityMap.put(User.class,id,user);
             return user;
         }
         return null;
     }
 
-    public User findUserbyEmail(String email, Connection connection, IdentityMap identityMap) throws SQLException{
+    public User findUserbyEmail(String email, Connection connection) throws SQLException{
         String sql = "SELECT * FROM users WHERE email = ?".formatted();
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setString(1, email);
@@ -144,15 +148,14 @@ public class UserMapper implements DataMapper<User>{
         ResultSet set = statement.executeQuery();
 
         if(set.next()){
+            /*
             Long id = set.getLong("id");
-
             if(identityMap.contains(User.class,id)){
                 return identityMap.get(User.class,id);
             }
-
-            User user = mapResultSetToUser(set);
-            identityMap.put(User.class, id, user);
-            return user;
+            */
+            //identityMap.put(User.class, id, user);
+            return mapResultSetToUser(set);
         }
         return null;
     }

@@ -1,59 +1,55 @@
 package com.tennis.repository;
 
-import com.tennis.database.UnitOfWork;
+import com.tennis.database.DatabaseConnection;
 import com.tennis.domain.User;
 import com.tennis.mapper.UserMapper;
+
+import java.sql.Connection;
 import java.util.List;
 
 public class UserRepository {
     private UserMapper mapper = new UserMapper();
 
-    public User findById(Long id, UnitOfWork uow){
+    public User findById(Long id, Connection connection){
         try{
-            return mapper.findUserById(id, uow.getConnection(), uow.getIdentityMap());
+            return mapper.findUserById(id, DatabaseConnection.getConnection());
         } catch (Exception e){
             throw new RuntimeException("Error fetching user.", e);
         }
     }
 
-    public User findByEmail(String email, UnitOfWork uow){
+    public User findByEmail(String email, Connection connection){
         try{
-            return mapper.findUserbyEmail(email,uow.getConnection(), uow.getIdentityMap());
+            return mapper.findUserbyEmail(email,DatabaseConnection.getConnection());
         } catch (Exception e){
             throw new RuntimeException("Error fetching user", e);
         }
     }
 
-    public List<User> findAll(UnitOfWork uow){
+    public List<User> findAll(Connection connection){
         try{
-            return mapper.findAllUsers(uow.getConnection());
+            return mapper.findAllUsers(DatabaseConnection.getConnection());
         } catch (Exception e){
             throw new RuntimeException("Error fetching users list.", e);
         }
     }
 
-    public Long save(User user, UnitOfWork uow){
+    public void save(User user, Connection connection){
         try{
             if(user.getId() == null){
-                Long id = mapper.insert(user,uow.getConnection());
-                uow.registerNew(user);
-                return id;
+                mapper.insert(user,DatabaseConnection.getConnection());
             } else {
-                mapper.update(user,uow.getConnection());
-                uow.registerDirty(user);
-                return user.getId();
+                mapper.update(user,DatabaseConnection.getConnection());
             }
         } catch (Exception e){
             throw new RuntimeException("Error saving user.", e);
         }
     }
 
-    public void delete(Long id, UnitOfWork uow){
+    public void delete(User user, Connection connection){
         try {
-            User user = mapper.findUserById(id, uow.getConnection(), uow.getIdentityMap());
             if (user != null){
-                mapper.delete(id, uow.getConnection());
-                uow.registerDeleted(user);
+                mapper.delete(user, DatabaseConnection.getConnection());
             }
         } catch (Exception e) {
             throw new RuntimeException("Error deleting user.",e);
