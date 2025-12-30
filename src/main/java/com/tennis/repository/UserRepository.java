@@ -12,7 +12,7 @@ public class UserRepository {
 
     public User findById(Long id, Connection connection){
         try{
-            return mapper.findUserById(id, DatabaseConnection.getConnection());
+            return mapper.findUserById(id, connection);
         } catch (Exception e){
             throw new RuntimeException("Error fetching user.", e);
         }
@@ -20,7 +20,7 @@ public class UserRepository {
 
     public User findByEmail(String email, Connection connection){
         try{
-            return mapper.findUserbyEmail(email,DatabaseConnection.getConnection());
+            return mapper.findUserbyEmail(email,connection);
         } catch (Exception e){
             throw new RuntimeException("Error fetching user", e);
         }
@@ -28,7 +28,7 @@ public class UserRepository {
 
     public List<User> findAll(Connection connection){
         try{
-            return mapper.findAllUsers(DatabaseConnection.getConnection());
+            return mapper.findAllUsers(connection);
         } catch (Exception e){
             throw new RuntimeException("Error fetching users list.", e);
         }
@@ -37,9 +37,9 @@ public class UserRepository {
     public void save(User user, Connection connection){
         try{
             if(user.getId() == null){
-                mapper.insert(user,DatabaseConnection.getConnection());
+                mapper.insert(user,connection);
             } else {
-                mapper.update(user,DatabaseConnection.getConnection());
+                mapper.update(user,connection);
             }
         } catch (Exception e){
             throw new RuntimeException("Error saving user.", e);
@@ -49,7 +49,7 @@ public class UserRepository {
     public void delete(User user, Connection connection){
         try {
             if (user != null){
-                mapper.delete(user, DatabaseConnection.getConnection());
+                mapper.delete(user, connection);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error deleting user.",e);
