@@ -1,5 +1,6 @@
 package com.tennis.dto;
 
+import com.tennis.domain.Court;
 import com.tennis.domain.Player;
 import com.tennis.domain.User;
 
@@ -20,5 +21,9 @@ public class DTOMapper {
         }
 
         return dto;
+    }
+
+    public static CourtDTO toCourtDTO(Court court){
+        return new CourtDTO(court);
     }
 }
