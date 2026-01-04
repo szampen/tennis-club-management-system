@@ -7,6 +7,9 @@ import com.tennis.dto.*;
 import com.tennis.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class UserService {
     private final UserRepository repository = new UserRepository();
 
@@ -69,4 +72,19 @@ public class UserService {
             return new ApiResponse(false, "Error: " + e.getMessage());
         }
     }
+
+    public ApiResponse getAllUsers(){
+        try{
+            List<User> users = repository.findAll(DatabaseConnection.getConnection());
+
+            List<UserDTO> usersDTOS = users.stream().map(DTOMapper::toUserDTO).collect(Collectors.toList());
+
+            return new ApiResponse(true, "OK", usersDTOS);
+        } catch (Exception e){
+            return new ApiResponse(false, "Error: " + e.getMessage());
+        }
+    }
+
+    //TODO: public ApiResponse update() - create DTO, when frontend design is known
+    //TODO: public ApiResponse delete() with UnitOfWork - deleting reservations
 }
