@@ -85,8 +85,7 @@ public class CourtMapper implements DataMapper<Court> {
         ResultSet rs = statement.executeQuery();
 
         if (rs.next()) {
-            Court court = mapResultSetToCourt(rs);
-            return court;
+            return mapResultSetToCourt(rs);
         }
         return null;
     }
@@ -143,6 +142,12 @@ public class CourtMapper implements DataMapper<Court> {
             courts.add(mapResultSetToCourt(rs));
         }
         return courts;
+    }
+
+    public void lockById(Long courtId, Connection connection) throws SQLException{
+        PreparedStatement statement = connection.prepareStatement("SELECT id FROM courts WHERE id = ? FOR UPDATE".formatted());
+        statement.setLong(1,courtId);
+        statement.executeQuery();
     }
 
 }
