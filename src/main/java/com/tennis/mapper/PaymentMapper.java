@@ -8,20 +8,19 @@ import java.sql.*;
 public class PaymentMapper implements DataMapper<Payment>{
     @Override
     public Long insert(Payment payment, Connection connection) throws SQLException {
-        String sql = "INSERT INTO payments (reservation_id, amount, status, payment_date, transaction_id) VALUES (?, ?, ?, ?, ?)".formatted();
+        String sql = "INSERT INTO payments (amount, status, payment_date, transaction_id) VALUES (?, ?, ?, ?)".formatted();
 
         PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        statement.setLong(1, payment.getReservationId());
-        statement.setDouble(2, payment.getAmount());
-        statement.setString(3, payment.getPaymentStatus().name());
+        statement.setDouble(1, payment.getAmount());
+        statement.setString(2, payment.getPaymentStatus().name());
 
         if(payment.getPaymentDate() != null){
-            statement.setTimestamp(4, Timestamp.valueOf(payment.getPaymentDate()));
+            statement.setTimestamp(3, Timestamp.valueOf(payment.getPaymentDate()));
         } else{
-            statement.setNull(4, Types.TIMESTAMP);
+            statement.setNull(3, Types.TIMESTAMP);
         }
 
-        statement.setString(5, payment.getTransactionId());
+        statement.setString(4, payment.getTransactionId());
 
         statement.executeUpdate();
 
@@ -37,20 +36,21 @@ public class PaymentMapper implements DataMapper<Payment>{
 
     @Override
     public void update(Payment payment, Connection connection)throws SQLException {
-        String sql = "UPDATE payments SET amount = ?, status = ?, payment_date = ?, transaction_id = ? WHERE id = ?".formatted();
+        String sql = "UPDATE payments SET reservation_id = ?, amount = ?, status = ?, payment_date = ?, transaction_id = ? WHERE id = ?".formatted();
 
         PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setDouble(1, payment.getAmount());
-        stmt.setString(2, payment.getPaymentStatus().name());
+        stmt.setLong(1,payment.getReservationId());
+        stmt.setDouble(2, payment.getAmount());
+        stmt.setString(3, payment.getPaymentStatus().name());
 
         if (payment.getPaymentDate() != null) {
-            stmt.setTimestamp(3, Timestamp.valueOf(payment.getPaymentDate()));
+            stmt.setTimestamp(4, Timestamp.valueOf(payment.getPaymentDate()));
         } else {
-            stmt.setNull(3, Types.TIMESTAMP);
+            stmt.setNull(4, Types.TIMESTAMP);
         }
 
-        stmt.setString(4, payment.getTransactionId());
-        stmt.setLong(5, payment.getId());
+        stmt.setString(5, payment.getTransactionId());
+        stmt.setLong(6, payment.getId());
 
         stmt.executeUpdate();
     }

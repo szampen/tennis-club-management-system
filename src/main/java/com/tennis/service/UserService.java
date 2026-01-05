@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository repository = new UserRepository();
 
+    //TODO: connection mambo-jumbo like in CourtService
     public ApiResponse login(LoginRequest request){
         try{
 

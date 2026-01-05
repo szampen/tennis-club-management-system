@@ -144,10 +144,4 @@ public class CourtMapper implements DataMapper<Court> {
         return courts;
     }
 
-    public void lockById(Long courtId, Connection connection) throws SQLException{
-        PreparedStatement statement = connection.prepareStatement("SELECT id FROM courts WHERE id = ? FOR UPDATE".formatted());
-        statement.setLong(1,courtId);
-        statement.executeQuery();
-    }
-
 }

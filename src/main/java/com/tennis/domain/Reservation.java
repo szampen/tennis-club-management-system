@@ -10,13 +10,8 @@ public class Reservation {
     private LocalDateTime endTime;
     private ReservationStatus status;
 
-    //TODO - objects for future Lazy Load implementation
-    private User user;
-    private Court court;
     private Payment payment;
 
-    private boolean userLoaded = false;
-    private boolean courtLoaded = false;
     private boolean paymentLoaded = false;
 
     public Reservation(){
@@ -38,9 +33,9 @@ public class Reservation {
         }
     }
 
-    public Double calculatePrice(){
+    public Double calculatePrice(Double price){
         long hours = java.time.Duration.between(startTime,endTime).toHours();
-        return hours * this.court.getPricePerHour();
+        return hours * price;
     }
 
     public void setId(Long id){
@@ -90,24 +85,6 @@ public class Reservation {
         this.status = status;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-        this.userLoaded = true;
-    }
-
-    public Court getCourt(){
-        return court;
-    }
-
-    public void setCourt(Court court) {
-        this.court = court;
-        this.courtLoaded = true;
-    }
-
     public Payment getPayment(){
         return payment;
     }
@@ -115,14 +92,6 @@ public class Reservation {
     public void setPayment(Payment payment) {
         this.payment = payment;
         this.paymentLoaded = true;
-    }
-
-    public boolean isUserLoaded() {
-        return userLoaded;
-    }
-
-    public boolean isCourtLoaded() {
-        return courtLoaded;
     }
 
     public boolean isPaymentLoaded() {

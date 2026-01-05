@@ -35,11 +35,12 @@ CREATE TABLE IF NOT EXISTS reservations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE CASCADE
+    CONSTRAINT uq_court_slot UNIQUE (court_id, start_time, end_time)
 ) CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS payments(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    reservation_id BIGINT NOT NULL,
+    reservation_id BIGINT,
     amount DECIMAL(10,2) NOT NULL,
     status ENUM('PENDING', 'COMPLETED', 'FAILED', 'REFUNDED') NOT NULL,
     payment_date DATETIME,
