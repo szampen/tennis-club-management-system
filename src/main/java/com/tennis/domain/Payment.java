@@ -3,7 +3,7 @@ package com.tennis.domain;
 import java.time.LocalDateTime;
 
 public class Payment {
-    private Long id; //TODO
+    private Long id;
     private Long reservationId;
     private Double amount;
     private PaymentStatus status;
@@ -24,6 +24,10 @@ public class Payment {
         if(this.status == PaymentStatus.COMPLETED){
             this.status = PaymentStatus.REFUNDED;
         }
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId(){
