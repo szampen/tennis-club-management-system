@@ -9,7 +9,6 @@ public class Reservation {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private ReservationStatus status;
-    private Long version; //TODO - Optimistic Offline Lock
 
     //TODO - objects for future Lazy Load implementation
     private User user;
@@ -22,7 +21,6 @@ public class Reservation {
 
     public Reservation(){
         this.status = ReservationStatus.ACTIVE;
-        //TODO - version
     }
 
     public void cancel(){
@@ -45,6 +43,9 @@ public class Reservation {
         return hours * this.court.getPricePerHour();
     }
 
+    public void setId(Long id){
+        this.id = id;
+    }
     public Long getId(){
         return id;
     }
@@ -88,9 +89,6 @@ public class Reservation {
     public void setStatus(ReservationStatus status) {
         this.status = status;
     }
-
-    //TODO - version setter/getter
-
 
     public User getUser() {
         return user;
