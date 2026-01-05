@@ -17,7 +17,6 @@ public abstract class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
-        //TODO id - to reconsider how is it supposed to work (database-wise etc.)
     }
 
     public abstract boolean canManageCourts();

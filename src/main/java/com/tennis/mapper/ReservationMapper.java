@@ -32,7 +32,6 @@ public class ReservationMapper implements DataMapper<Reservation>{
         throw new SQLException("Error retrieving reservation's id.");
     }
 
-    //TODO: change of status, bcs updating reservation doesnt make sense, only cancelling one.
     @Override
     public void update(Reservation reservation, Connection connection){}
 

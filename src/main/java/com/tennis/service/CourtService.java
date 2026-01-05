@@ -15,7 +15,7 @@ import com.tennis.util.CourtFilter;
 
 import java.sql.Connection;
 import java.util.List;
-
+//TODO: instead of adding imageUrl after insert, think about updating after knowing where the file is
 public class CourtService {
     private final CourtRepository courtRepository = new CourtRepository();
     private final UserRepository userRepository = new UserRepository();
@@ -160,7 +160,6 @@ public class CourtService {
     }
 }
 
-    //TODO: deleting reservations - UnitOfWork
     public ApiResponse deleteCourt(Long courtId, Long adminId){
         Connection conn = null;
         try{

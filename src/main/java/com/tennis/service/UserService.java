@@ -7,17 +7,19 @@ import com.tennis.dto.*;
 import com.tennis.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class UserService {
     private final UserRepository repository = new UserRepository();
 
-    //TODO: connection mambo-jumbo like in CourtService
     public ApiResponse login(LoginRequest request){
+        Connection conn = null;
         try{
+            conn = DatabaseConnection.getConnection();
 
-            User user = repository.findByEmail(request.getEmail(), DatabaseConnection.getConnection());
+            User user = repository.findByEmail(request.getEmail(), conn);
 
             if(user == null){
                 return new ApiResponse(false, "Incorrect email.");
@@ -33,12 +35,17 @@ public class UserService {
 
         } catch (Exception e){
             return new ApiResponse(false, "Error logging in: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
         }
     }
 
     public ApiResponse register(RegisterRequest request){
+        Connection conn = null;
         try{
-            User existing = repository.findByEmail(request.getEmail(), DatabaseConnection.getConnection());
+            conn = DatabaseConnection.getConnection();
+
+            User existing = repository.findByEmail(request.getEmail(), conn);
             if(existing != null){
                 return new ApiResponse(false, "Email is already used.");
             }
@@ -50,19 +57,24 @@ public class UserService {
             player.setLastName(request.getLastName());
             player.setPhoneNumber(request.getPhoneNumber());
 
-            repository.save(player, DatabaseConnection.getConnection());
+            repository.save(player, conn);
 
             UserDTO userDTO = DTOMapper.toUserDTO(player);
             return new ApiResponse(true, "Registration was successful.", userDTO);
 
         } catch (Exception e) {
             return new ApiResponse(false, "Registration error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
         }
     }
 
     public ApiResponse getUser(Long id){
+        Connection conn = null;
         try {
-            User user = repository.findById(id, DatabaseConnection.getConnection());
+            conn = DatabaseConnection.getConnection();
+
+            User user = repository.findById(id, conn);
 
             if(user == null) return new ApiResponse(false, "User not found.");
 
@@ -71,21 +83,28 @@ public class UserService {
             return new ApiResponse(true, "OK", userDTO);
         } catch (Exception e) {
             return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
         }
     }
 
     public ApiResponse getAllUsers(){
+        Connection conn = null;
         try{
-            List<User> users = repository.findAll(DatabaseConnection.getConnection());
+            conn = DatabaseConnection.getConnection();
+
+            List<User> users = repository.findAll(conn);
 
             List<UserDTO> usersDTOS = users.stream().map(DTOMapper::toUserDTO).collect(Collectors.toList());
 
             return new ApiResponse(true, "OK", usersDTOS);
         } catch (Exception e){
             return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
         }
     }
 
     //TODO: public ApiResponse update() - create DTO, when frontend design is known
-    //TODO: public ApiResponse delete() with UnitOfWork - deleting reservations
+    //TODO: public ApiResponse delete()
 }

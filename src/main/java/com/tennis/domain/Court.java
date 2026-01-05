@@ -1,7 +1,7 @@
 package com.tennis.domain;
 
 public class Court {
-    private Long id; //TODO
+    private Long id;
     private String name;
     private int courtNumber;
     private SurfaceType surfaceType;
