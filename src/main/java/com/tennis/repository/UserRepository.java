@@ -3,10 +3,12 @@ package com.tennis.repository;
 import com.tennis.database.DatabaseConnection;
 import com.tennis.domain.User;
 import com.tennis.mapper.UserMapper;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.util.List;
 
+@Repository
 public class UserRepository {
     private UserMapper mapper = new UserMapper();
 

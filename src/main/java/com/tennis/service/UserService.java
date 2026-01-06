@@ -6,13 +6,19 @@ import com.tennis.domain.User;
 import com.tennis.dto.*;
 import com.tennis.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class UserService {
-    private final UserRepository repository = new UserRepository();
+    private final UserRepository repository;
+
+    public UserService(UserRepository repo){
+        this.repository = repo;
+    }
 
     public ApiResponse login(LoginRequest request){
         Connection conn = null;
