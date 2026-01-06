@@ -77,4 +77,3 @@ src/main/resources/application.properties
 src/main/frontend/dist
 src/main/frontend/node_modules
 
-src/main/java/com/tennis/domain/tournament
