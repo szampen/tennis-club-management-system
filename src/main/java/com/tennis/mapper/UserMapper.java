@@ -19,7 +19,7 @@ public class UserMapper implements DataMapper<User>{
 
     @Override
     public Long insert(User user, Connection connection) throws SQLException {
-        String sql = "INSERT INTO users (email, password, first_name, last_name, phone_number, user_type, ranking_points) VALUES (?, ?, ?, ?, ?, ?, ?)".formatted();
+        String sql = "INSERT INTO users (email, password, first_name, last_name, phone_number, user_type, ranking_points) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         statement.setString(1, user.getEmail());
@@ -51,7 +51,7 @@ public class UserMapper implements DataMapper<User>{
 
     @Override
     public void update(User user, Connection connection) throws SQLException{
-        String sql = "UPDATE users SET email = ?, password = ?, first_name = ?, last_name = ?, phone_number = ?, ranking_points = ? WHERE id = ?".formatted();
+        String sql = "UPDATE users SET email = ?, password = ?, first_name = ?, last_name = ?, phone_number = ?, ranking_points = ? WHERE id = ?";
 
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setString(1, user.getEmail());
@@ -73,7 +73,7 @@ public class UserMapper implements DataMapper<User>{
 
     @Override
     public void delete(User user, Connection connection) throws SQLException{
-        String sql = "DELETE FROM users WHERE id = ?".formatted();
+        String sql = "DELETE FROM users WHERE id = ?";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1,user.getId());
         statement.executeUpdate();
@@ -107,7 +107,7 @@ public class UserMapper implements DataMapper<User>{
 
     public List<User> findAllUsers(Connection connection) throws SQLException{
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users".formatted();
+        String sql = "SELECT * FROM users";
         Statement statement = connection.createStatement();
         ResultSet rs = statement.executeQuery(sql);
 
@@ -126,7 +126,7 @@ public class UserMapper implements DataMapper<User>{
 
         */
 
-        String sql = "SELECT * FROM users WHERE id = ?".formatted();
+        String sql = "SELECT * FROM users WHERE id = ?";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1,id);
 
@@ -141,7 +141,7 @@ public class UserMapper implements DataMapper<User>{
     }
 
     public User findUserbyEmail(String email, Connection connection) throws SQLException{
-        String sql = "SELECT * FROM users WHERE email = ?".formatted();
+        String sql = "SELECT * FROM users WHERE email = ?";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setString(1, email);
 

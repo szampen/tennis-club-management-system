@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     status ENUM('ACTIVE','CANCELLED', 'COMPLETED') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE CASCADE
+    FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE CASCADE,
     CONSTRAINT uq_court_slot UNIQUE (court_id, start_time, end_time)
 ) CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

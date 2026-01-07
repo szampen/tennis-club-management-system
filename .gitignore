@@ -72,3 +72,8 @@ logs/
 
 #application.properties
 src/main/resources/application.properties
+
+#frontend
+src/main/frontend/dist
+src/main/frontend/node_modules
+
