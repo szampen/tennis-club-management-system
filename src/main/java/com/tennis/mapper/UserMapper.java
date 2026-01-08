@@ -1,6 +1,5 @@
 package com.tennis.mapper;
 
-import com.tennis.database.IdentityMap;
 import com.tennis.domain.Admin;
 import com.tennis.domain.Player;
 import com.tennis.domain.User;
@@ -117,6 +116,21 @@ public class UserMapper implements DataMapper<User>{
 
         return users;
     }
+
+    //TODO: mapping to user makes sense???
+    public List<Player> findByTournament(Long tournamentId, Connection connection) throws SQLException{
+        List<Player> players = new ArrayList<>();
+        String sql = "SELECT u.* FROM users u INNER JOIN tournament_participants tp ON u.id = tp.user_id WHERE tp.tournament_id = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setLong(1, tournamentId);
+
+        ResultSet rs = statement.executeQuery();
+        while(rs.next()){
+            players.add((Player) mapResultSetToUser(rs));
+        }
+        return players;
+    }
+
 
     public User findUserById(Long id, Connection connection) throws SQLException{
         /*
