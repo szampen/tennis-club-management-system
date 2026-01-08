@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TournamentMatch {
+public class Match {
     private Long id;
     private Long tournamentId;
     private Long player1Id;
@@ -15,15 +15,21 @@ public class TournamentMatch {
     private Long nextMatchId;
     private List<SetScore> sets;
     private Integer points;
-    private Long reservationId;
+    private Long courtId;
     private LocalDateTime scheduledTime;
+    private Integer p1SetsWon;
+    private Integer p2SetsWon;
 
-    public TournamentMatch(){
+    public Match(){
         this.sets = new ArrayList<>();
+        p1SetsWon = 0;
+        p2SetsWon = 0;
     }
 
     public void addSet(int p1, int p2){
         sets.add(new SetScore(p1,p2));
+        if(p1 > p2) p1SetsWon++;
+        else p2SetsWon++;
     }
 
     public void getWinner(){
@@ -101,12 +107,12 @@ public class TournamentMatch {
         this.points = points;
     }
 
-    public Long getReservationId() {
-        return reservationId;
+    public Long getCourtId() {
+        return courtId;
     }
 
-    public void setReservationId(Long reservationId) {
-        this.reservationId = reservationId;
+    public void setCourtId(Long courtId) {
+        this.courtId = courtId;
     }
 
     public LocalDateTime getScheduledTime() {
@@ -117,4 +123,19 @@ public class TournamentMatch {
         this.scheduledTime = scheduledTime;
     }
 
+    public Integer getP1SetsWon() {
+        return p1SetsWon;
+    }
+
+    public void setP1SetsWon(Integer p1SetsWon) {
+        this.p1SetsWon = p1SetsWon;
+    }
+
+    public Integer getP2SetsWon() {
+        return p2SetsWon;
+    }
+
+    public void setP2SetsWon(Integer p2SetsWon) {
+        this.p2SetsWon = p2SetsWon;
+    }
 }

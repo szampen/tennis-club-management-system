@@ -8,7 +8,7 @@ import java.sql.*;
 public class PaymentMapper implements DataMapper<Payment>{
     @Override
     public Long insert(Payment payment, Connection connection) throws SQLException {
-        String sql = "INSERT INTO payments (amount, status, payment_date, transaction_id) VALUES (?, ?, ?, ?)".formatted();
+        String sql = "INSERT INTO payments (amount, status, payment_date, transaction_id) VALUES (?, ?, ?, ?)";
 
         PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         statement.setDouble(1, payment.getAmount());
@@ -36,7 +36,7 @@ public class PaymentMapper implements DataMapper<Payment>{
 
     @Override
     public void update(Payment payment, Connection connection)throws SQLException {
-        String sql = "UPDATE payments SET reservation_id = ?, amount = ?, status = ?, payment_date = ?, transaction_id = ? WHERE id = ?".formatted();
+        String sql = "UPDATE payments SET reservation_id = ?, amount = ?, status = ?, payment_date = ?, transaction_id = ? WHERE id = ?";
 
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setLong(1,payment.getReservationId());
@@ -57,7 +57,7 @@ public class PaymentMapper implements DataMapper<Payment>{
 
     @Override
     public void delete(Payment payment, Connection connection) throws SQLException{
-        String sql = "DELETE FROM payments WHERE id = ?".formatted();
+        String sql = "DELETE FROM payments WHERE id = ?";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setLong(1, payment.getId());
         stmt.executeUpdate();
@@ -80,7 +80,7 @@ public class PaymentMapper implements DataMapper<Payment>{
     }
 
     public Payment findById(Long id, Connection connection) throws SQLException {
-        String sql = "SELECT * FROM payments WHERE id = ?".formatted();
+        String sql = "SELECT * FROM payments WHERE id = ?";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setLong(1, id);
 
@@ -94,7 +94,7 @@ public class PaymentMapper implements DataMapper<Payment>{
     }
 
     public Payment findByReservationId(Long reservationId, Connection connection) throws SQLException {
-        String sql = "SELECT * FROM payments WHERE reservation_id = ?".formatted();
+        String sql = "SELECT * FROM payments WHERE reservation_id = ?";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setLong(1, reservationId);
 

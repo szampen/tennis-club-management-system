@@ -2,6 +2,7 @@ package com.tennis.service;
 
 import com.tennis.database.DatabaseConnection;
 import com.tennis.database.UnitOfWork;
+import com.tennis.database.UnitOfWorkFactory;
 import com.tennis.domain.*;
 import com.tennis.dto.*;
 import com.tennis.repository.CourtRepository;
@@ -31,7 +32,7 @@ public class ReservationService {
     public ApiResponse createReservation(CreateReservationRequest request){
         UnitOfWork uow = null;
         try{
-            uow = new UnitOfWork();
+            uow = UnitOfWorkFactory.create();
 
             User user = userRepository.findById(request.getUserId(),uow.getConnection());
             if(user == null) return new ApiResponse(false, "User not found.");

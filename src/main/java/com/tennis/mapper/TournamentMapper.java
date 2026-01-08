@@ -15,13 +15,7 @@ public class TournamentMapper implements DataMapper<Tournament> {
         String sql = "INSERT INTO tournaments (name, start_date, end_date, 'rank', entry_fee, ranking_requirement, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        statement.setString(1, tournament.getName());
-        statement.setDate(2, Date.valueOf(tournament.getStartDate()));
-        statement.setDate(3, Date.valueOf(tournament.getEndDate()));
-        statement.setString(4, tournament.getRank().name());
-        statement.setDouble(5, tournament.getEntryFee());
-        statement.setInt(6, tournament.getRankingRequirement());
-        statement.setString(7, tournament.getStatus().name());
+        setPreparedStatement(statement,tournament);
 
         statement.executeUpdate();
 
@@ -40,13 +34,7 @@ public class TournamentMapper implements DataMapper<Tournament> {
         String sql = "UPDATE tournaments SET name = ?, start_date = ?, end_date = ?, 'rank' = ?, entry_fee = ?, ranking_requirement = ?, status = ? WHERE id = ?";
 
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setString(1, tournament.getName());
-        statement.setDate(2, Date.valueOf(tournament.getStartDate()));
-        statement.setDate(3, Date.valueOf(tournament.getEndDate()));
-        statement.setString(4, tournament.getRank().name());
-        statement.setDouble(5, tournament.getEntryFee());
-        statement.setInt(6, tournament.getRankingRequirement());
-        statement.setString(7, tournament.getStatus().name());
+        setPreparedStatement(statement,tournament);
         statement.setLong(8, tournament.getId());
 
         statement.executeUpdate();
@@ -64,11 +52,20 @@ public class TournamentMapper implements DataMapper<Tournament> {
         Tournament tournament = new Tournament(TournamentRank.valueOf(rs.getString("rank")));
         tournament.setId(rs.getLong("id"));
         tournament.setName(rs.getString("name"));
-        tournament.setStartDate(rs.getDate("start_date").toLocalDate());
-        tournament.setEndDate(rs.getDate("end_date").toLocalDate());
         tournament.setStatus(TournamentStatus.valueOf(rs.getString("status")));
-        tournament.setEntryFee(rs.getDouble("entry_fee"));
-        tournament.setRankingRequirement(rs.getInt("min_ranking_required"));
+
+        Date ts = rs.getDate("start_date");
+        if(ts != null) tournament.setStartDate(ts.toLocalDate());
+
+        Date ts2 = rs.getDate("end_date");
+        if(ts2 != null) tournament.setEndDate(ts2.toLocalDate());
+
+        Double entry = rs.getDouble("entry_fee");
+        if(!rs.wasNull()) tournament.setEntryFee(entry);
+
+        Integer value = rs.getInt("ranking_requirement");
+        if(!rs.wasNull()) tournament.setRankingRequirement(value);
+
         return tournament;
     }
 
@@ -108,6 +105,30 @@ public class TournamentMapper implements DataMapper<Tournament> {
             tournaments.add(mapResultSetToTournament(rs));
         }
         return tournaments;
+    }
+
+    private void setPreparedStatement(PreparedStatement statement, Tournament tournament) throws SQLException{
+        statement.setString(1, tournament.getName());
+
+        if(tournament.getStartDate() != null) statement.setDate(2, Date.valueOf(tournament.getStartDate()));
+        else statement.setNull(2, Types.DATE);
+
+        if(tournament.getEndDate() != null) statement.setDate(3, Date.valueOf(tournament.getEndDate()));
+        else statement.setNull(3, Types.DATE);
+
+        statement.setString(4, tournament.getRank().name());
+
+        statement.setDouble(5, tournament.getEntryFee());
+
+        Double entry = tournament.getEntryFee();
+        if(entry != null) statement.setDouble(5, entry);
+        else statement.setNull(5,Types.DOUBLE);
+
+        Integer ranking = tournament.getRankingRequirement();
+        if(ranking != null) statement.setInt(6, ranking);
+        else statement.setNull(6, Types.INTEGER);
+
+        statement.setString(7, tournament.getStatus().name());
     }
 
     //TODO: i dont know if id's or objects are better
