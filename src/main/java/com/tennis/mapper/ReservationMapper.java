@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ReservationMapper implements DataMapper<Reservation>{
     public Long insert(Reservation reservation, Connection connection) throws SQLException {
-        String sql = "INSERT INTO reservations (user_id, court_id, start_time, end_time, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO reservations (user_id, court_id, start_time, end_time, status, expires_at) VALUES (?, ?, ?, ?, ?, ?)";
 
         PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         stmt.setLong(1, reservation.getUserId());
@@ -22,6 +22,7 @@ public class ReservationMapper implements DataMapper<Reservation>{
         stmt.setTimestamp(3, Timestamp.valueOf(reservation.getStartTime()));
         stmt.setTimestamp(4, Timestamp.valueOf(reservation.getEndTime()));
         stmt.setString(5, reservation.getStatus().name());
+        stmt.setTimestamp(6,Timestamp.valueOf(reservation.getExpiresAt()));
 
         stmt.executeUpdate();
 
@@ -57,6 +58,7 @@ public class ReservationMapper implements DataMapper<Reservation>{
         reservation.setStartTime(rs.getTimestamp("start_time").toLocalDateTime());
         reservation.setEndTime(rs.getTimestamp("end_time").toLocalDateTime());
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("status")));
+        reservation.setExpiresAt(rs.getTimestamp("expires_at").toLocalDateTime());
         return reservation;
     }
 
@@ -127,5 +129,22 @@ public class ReservationMapper implements DataMapper<Reservation>{
         }
 
         return reservations;
+    }
+
+    public void cleanupExpiredHolds(Connection connection) throws SQLException{
+        String sql = "DELETE FROM reservations WHERE status = 'HOLD' AND expires_at < NOW()";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.executeUpdate();
+    }
+
+    public void confirmTournamentReservation(Long matchId, Connection conn) throws SQLException {
+        String sql = "UPDATE reservations r " +
+                "JOIN matches m ON r.court_id = m.court_id AND r.start_time = m.scheduled_time " +
+                "SET r.status = 'ACTIVE', r.expires_at = NULL " +
+                "WHERE m.id = ?";
+        PreparedStatement statement = conn.prepareStatement(sql);
+        statement.setLong(1, matchId);
+        statement.executeUpdate();
+
     }
 }

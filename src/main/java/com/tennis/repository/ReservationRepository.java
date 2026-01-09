@@ -1,15 +1,16 @@
 package com.tennis.repository;
 
-import com.tennis.domain.Court;
 import com.tennis.domain.Reservation;
 import com.tennis.mapper.ReservationMapper;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Repository
 public class ReservationRepository {
-    private ReservationMapper mapper = new ReservationMapper();
+    private final ReservationMapper mapper = new ReservationMapper();
 
     public Reservation findById(Long id, Connection connection) {
         try {
@@ -40,6 +41,22 @@ public class ReservationRepository {
             return mapper.findByCourtIdAndDateRange(courtId, start, end, connection);
         } catch (Exception e) {
             throw new RuntimeException("Error fetching reservation.", e);
+        }
+    }
+
+    public void cleanupExpiredHolds(Connection connection){
+        try{
+            mapper.cleanupExpiredHolds(connection);
+        } catch (Exception e){
+            throw new RuntimeException("Error cleaning up expired holds.",e);
+        }
+    }
+
+    public void confirmTournamentReservation(Long matchId, Connection connection){
+        try{
+            mapper.confirmTournamentReservation(matchId,connection);
+        } catch (Exception e){
+            throw new RuntimeException("Error confirming tournament reservation.");
         }
     }
 

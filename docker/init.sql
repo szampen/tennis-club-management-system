@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS reservations (
     court_id BIGINT,
     start_time DATETIME NOT NULL,
     end_time DATETIME NOT NULL,
-    status ENUM('ACTIVE','CANCELLED', 'COMPLETED') NOT NULL,
+    status ENUM('ACTIVE','CANCELLED', 'COMPLETED', 'HOLD') NOT NULL,
+    expires_at DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE SET NULL,
@@ -58,7 +59,9 @@ CREATE TABLE IF NOT EXISTS tournaments(
     `rank`              ENUM ('TIER_3', 'TIER_2', 'TIER_1') NOT NULL,
     entry_fee           DOUBLE,
     ranking_requirement INT,
-    status              ENUM ('DRAFT','CANCELLED', 'COMPLETED', 'ONGOING', 'REGISTRATION_CLOSED', 'REGISTRATION_OPEN') not null
+    winner_id           BIGINT,
+    status              ENUM ('DRAFT','CANCELLED', 'COMPLETED', 'ONGOING', 'REGISTRATION_CLOSED', 'REGISTRATION_OPEN') not null,
+    FOREIGN KEY(winner_id) REFERENCES users(id)
 ) CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS tournament_participants(
