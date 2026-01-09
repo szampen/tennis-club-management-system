@@ -5,6 +5,8 @@ public class CreateReservationRequest {
     private Long courtId;
     private String startTime; // Format: "2024-12-20T10:00:00"
     private String endTime;
+    private Long matchId;
+    private boolean isTournament;
 
     public CreateReservationRequest() {}
 
@@ -38,5 +40,21 @@ public class CreateReservationRequest {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    public Long getMatchId() {
+        return matchId;
+    }
+
+    public boolean isTournament() {
+        return isTournament;
+    }
+
+    public void setMatchId(Long matchId) {
+        this.matchId = matchId;
+    }
+
+    public void setTournament(boolean tournament) {
+        isTournament = tournament;
     }
 }

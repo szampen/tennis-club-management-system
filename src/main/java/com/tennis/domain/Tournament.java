@@ -1,6 +1,7 @@
 package com.tennis.domain;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class Tournament {
     private Long id;
@@ -12,10 +13,12 @@ public class Tournament {
     private Integer rankingRequirement;
     private TournamentStatus status;
     private Integer participants;
+    private Long winnerId;
 
     public Tournament(TournamentRank rank){
         this.rank = rank;
         participants = rank.getParticipants();
+        status = TournamentStatus.DRAFT;
     }
 
     public boolean canPlayerRegister(Player player, int currentParticipants) {
@@ -126,5 +129,26 @@ public class Tournament {
 
     public void setStatus(TournamentStatus status) {
         this.status = status;
+    }
+
+    public Long getWinnerId() {
+        return winnerId;
+    }
+
+    public void setWinnerId(Long winnerId) {
+        this.winnerId = winnerId;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        Tournament that = (Tournament) object;
+        if(id == null || that.id == null) return false;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

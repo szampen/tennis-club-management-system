@@ -2,10 +2,12 @@ package com.tennis.repository;
 
 import com.tennis.domain.Match;
 import com.tennis.mapper.MatchMapper;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.util.List;
 
+@Repository
 public class MatchRepository {
     private final MatchMapper mapper = new MatchMapper();
 
