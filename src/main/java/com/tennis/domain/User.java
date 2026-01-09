@@ -1,5 +1,7 @@
 package com.tennis.domain;
 
+import java.util.Objects;
+
 public abstract class User {
     private Long id;
     private String email;
@@ -75,5 +77,18 @@ public abstract class User {
 
     public void setUserType(UserType userType){
         this.userType = userType;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        User user = (User) object;
+        if (id == null || user.id == null) return false;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

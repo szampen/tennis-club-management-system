@@ -1,6 +1,7 @@
 package com.tennis.domain;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Payment {
     private Long id;
@@ -72,5 +73,18 @@ public class Payment {
 
     public void setTransactionId(String id){
         this.transactionId = id;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        Payment payment = (Payment) object;
+        if(id == null || payment.id == null) return false;
+        return Objects.equals(id, payment.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

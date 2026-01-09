@@ -2,11 +2,13 @@ package com.tennis.repository;
 
 import com.tennis.domain.Payment;
 import com.tennis.mapper.PaymentMapper;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 
+@Repository
 public class PaymentRepository {
-    private PaymentMapper mapper = new PaymentMapper();
+    private final PaymentMapper mapper = new PaymentMapper();
 
     public Payment findById(Long id, Connection connection) {
         try {

@@ -5,6 +5,7 @@ import com.tennis.util.SetScore;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Match {
     private Long id;
@@ -146,5 +147,18 @@ public class Match {
 
     public void setRound(Integer round) {
         this.round = round;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        Match match = (Match) object;
+        if(id == null || match.id == null) return false;
+        return Objects.equals(id, match.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
