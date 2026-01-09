@@ -19,6 +19,7 @@ public class Match {
     private LocalDateTime scheduledTime;
     private Integer p1SetsWon;
     private Integer p2SetsWon;
+    private Integer round;
 
     public Match(){
         this.sets = new ArrayList<>();
@@ -137,5 +138,13 @@ public class Match {
 
     public void setP2SetsWon(Integer p2SetsWon) {
         this.p2SetsWon = p2SetsWon;
+    }
+
+    public Integer getRound() {
+        return round;
+    }
+
+    public void setRound(Integer round) {
+        this.round = round;
     }
 }

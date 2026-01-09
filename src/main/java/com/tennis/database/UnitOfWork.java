@@ -87,8 +87,18 @@ public class UnitOfWork {
         } catch (Exception e){
             rollback();
             throw new Exception("Unit of Work commit failed: " + e.getMessage(), e);
-        } finally{
-            close();
+        }
+    }
+
+    public void flush() throws Exception{
+        try{
+            for (Object obj : newObjects){
+                insertObject(obj);
+            }
+            newObjects.clear();
+        } catch (Exception e){
+            rollback();
+            throw new Exception("Unit of Work flush failed: " + e.getMessage(),e);
         }
     }
 
@@ -105,6 +115,10 @@ public class UnitOfWork {
             deletedObjects.clear();
             close();
         }
+    }
+
+    public void finish() {
+        close();
     }
 
     private void close(){

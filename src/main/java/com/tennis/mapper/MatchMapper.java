@@ -16,8 +16,8 @@ public class MatchMapper implements DataMapper<Match> {
 
     @Override
     public Long insert(Match match, Connection connection) throws SQLException, JsonProcessingException {
-        String sql = "INSERT INTO matches (tournament_id, player1_id, player2_id, winner_id, next_match_id, sets, points, court_id, scheduled_time, p1_sets_won, p2_sets_won)" +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO matches (tournament_id, player1_id, player2_id, winner_id, next_match_id, sets, points, court_id, scheduled_time, p1_sets_won, p2_sets_won, round)" +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try {
             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -31,19 +31,19 @@ public class MatchMapper implements DataMapper<Match> {
                 return id;
             }
         } catch (Exception e) {
-            throw new SQLException("Fetching match id failed");
+            throw new SQLException("Fetching match id failed",e);
         }
         return null;
     }
 
     @Override
     public void update(Match match, Connection connection) throws SQLException {
-        String sql = "UPDATE matches SET tournament_id = ?, player1_id = ?, player2_id = ?, winner_id = ?, next_match_id = ?, sets = ?, points = ?, court_id = ?, scheduled_time = ?, p1_sets_won = ?, p2_sets_won = ? WHERE id = ?";
+        String sql = "UPDATE matches SET tournament_id = ?, player1_id = ?, player2_id = ?, winner_id = ?, next_match_id = ?, sets = ?, points = ?, court_id = ?, scheduled_time = ?, p1_sets_won = ?, p2_sets_won = ?, round = ? WHERE id = ?";
 
         try{
             PreparedStatement statement = connection.prepareStatement(sql);
             setPreparedStatement(statement,match);
-            statement.setLong(12, match.getId());
+            statement.setLong(13, match.getId());
             statement.executeUpdate();
         } catch (Exception e) {
             throw new SQLException("Error updating match.", e);
@@ -83,6 +83,7 @@ public class MatchMapper implements DataMapper<Match> {
 
         match.setP1SetsWon(getIntOrNull(rs, "p1_sets_won"));
         match.setP2SetsWon(getIntOrNull(rs, "p2_sets_won"));
+        match.setRound(rs.getInt("round"));
 
         return match;
     }
@@ -242,5 +243,6 @@ public class MatchMapper implements DataMapper<Match> {
 
         setIntOrNull(statement,10, match.getP1SetsWon());
         setIntOrNull(statement,11, match.getP2SetsWon());
+        statement.setInt(12,match.getRound());
     }
 }

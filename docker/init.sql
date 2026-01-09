@@ -81,7 +81,8 @@ CREATE TABLE IF NOT EXISTS matches (
     court_id BIGINT,
     scheduled_time DATETIME,
     p1_sets_won INT,
-    p2_sets_won INT
+    p2_sets_won INT,
+    round INT NOT NULL
     FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
     FOREIGN KEY (winner_id) REFERENCES users(id),
     FOREIGN KEY (player1_id) REFERENCES users(id),

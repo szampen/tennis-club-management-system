@@ -58,20 +58,20 @@ public class ReservationService {
 
             Double price = reservation.calculatePrice(court.getPricePerHour());
 
+            uow.registerNew(reservation);
+            uow.flush();
+
             Payment payment = new Payment();
             payment.setAmount(price);
             payment.setPaymentStatus(PaymentStatus.PENDING);
+            payment.setReservationId(reservation.getId());
 
             //Simulation of payment
             payment.processPayment();
 
             reservation.setPayment(payment);
-            uow.registerNew(reservation);
-            uow.registerNew(payment);
-            uow.commit();
 
-            payment.setReservationId(reservation.getId());
-            uow.registerDirty(payment);
+            uow.registerNew(payment);
             uow.commit();
 
             ReservationDTO dto = DTOMapper.toReservationDTO(reservation);
@@ -82,6 +82,8 @@ public class ReservationService {
         } catch (Exception e){
             if (uow != null) uow.rollback();
             return new ApiResponse(false, "Error creating reservation: " + e.getMessage());
+        } finally {
+            if (uow != null) uow.finish();
         }
     }
 
