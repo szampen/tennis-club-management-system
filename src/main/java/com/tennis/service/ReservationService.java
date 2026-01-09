@@ -2,13 +2,12 @@ package com.tennis.service;
 
 import com.tennis.database.DatabaseConnection;
 import com.tennis.database.UnitOfWork;
+import com.tennis.database.UnitOfWorkFactory;
 import com.tennis.domain.*;
 import com.tennis.dto.*;
-import com.tennis.repository.CourtRepository;
-import com.tennis.repository.PaymentRepository;
-import com.tennis.repository.ReservationRepository;
-import com.tennis.repository.UserRepository;
+import com.tennis.repository.*;
 import com.tennis.util.TimeSlot;
+import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.time.LocalDate;
@@ -17,21 +16,27 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class ReservationService {
     private static final int OPENING_HOUR = 10;
     private static final int CLOSING_HOUR = 22;
     private static final int SLOT_DURATION = 1;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private final MatchRepository matchRepository;
 
     private ReservationRepository reservationRepository = new ReservationRepository();
     private UserRepository userRepository = new UserRepository();
     private CourtRepository courtRepository = new CourtRepository();
     private PaymentRepository paymentRepository = new PaymentRepository();
 
+    public ReservationService(MatchRepository matchRepository) {
+        this.matchRepository = matchRepository;
+    }
+
     public ApiResponse createReservation(CreateReservationRequest request){
         UnitOfWork uow = null;
         try{
-            uow = new UnitOfWork();
+            uow = UnitOfWorkFactory.create();
 
             User user = userRepository.findById(request.getUserId(),uow.getConnection());
             if(user == null) return new ApiResponse(false, "User not found.");
@@ -53,24 +58,43 @@ public class ReservationService {
             reservation.setCourtId(request.getCourtId());
             reservation.setStartTime(startTime);
             reservation.setEndTime(endTime);
-            reservation.setStatus(ReservationStatus.ACTIVE);
 
-            Double price = reservation.calculatePrice(court.getPricePerHour());
+            if(request.isTournament()){
+                reservation.setStatus(ReservationStatus.HOLD);
+                reservation.setExpiresAt(LocalDateTime.now().plusMinutes(15));
+            } else
+            {
+                reservation.setStatus(ReservationStatus.ACTIVE);
+            }
 
-            Payment payment = new Payment();
-            payment.setAmount(price);
-            payment.setPaymentStatus(PaymentStatus.PENDING);
-
-            //Simulation of payment
-            payment.processPayment();
-
-            reservation.setPayment(payment);
             uow.registerNew(reservation);
-            uow.registerNew(payment);
-            uow.commit();
+            uow.flush();
 
-            payment.setReservationId(reservation.getId());
-            uow.registerDirty(payment);
+            if(!request.isTournament()){
+                Double price = reservation.calculatePrice(court.getPricePerHour());
+
+                Payment payment = new Payment();
+                payment.setAmount(price);
+                payment.setPaymentStatus(PaymentStatus.PENDING);
+                payment.setReservationId(reservation.getId());
+
+                //Simulation of payment
+                payment.processPayment();
+
+                reservation.setPayment(payment);
+
+                uow.registerNew(payment);
+            }
+
+            if(request.isTournament() && request.getMatchId() != null){
+                Match match = matchRepository.findById(request.getMatchId(), uow.getConnection());
+                if(match != null){
+                    match.setCourtId(court.getId());
+                    match.setScheduledTime(startTime);
+                    uow.registerDirty(match);
+                }
+            }
+
             uow.commit();
 
             ReservationDTO dto = DTOMapper.toReservationDTO(reservation);
@@ -81,6 +105,8 @@ public class ReservationService {
         } catch (Exception e){
             if (uow != null) uow.rollback();
             return new ApiResponse(false, "Error creating reservation: " + e.getMessage());
+        } finally {
+            if (uow != null) uow.finish();
         }
     }
 

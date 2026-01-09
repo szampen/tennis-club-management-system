@@ -13,17 +13,10 @@ public class CourtMapper implements DataMapper<Court> {
 
     @Override
     public Long insert(Court court, Connection connection) throws SQLException {
-        String sql = "INSERT INTO courts (name, court_number, surface_type, has_roof, location, image_url,available_for_reservations, price_per_hour) VALUES (?,?,?,?,?,?,?,?)".formatted();
+        String sql = "INSERT INTO courts (name, court_number, surface_type, has_roof, location, image_url,available_for_reservations, price_per_hour) VALUES (?,?,?,?,?,?,?,?)";
 
         PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-        statement.setString(1, court.getName());
-        statement.setInt(2, court.getCourtNumber());
-        statement.setString(3, court.getSurfaceType().name());
-        statement.setBoolean(4, court.hasRoof());
-        statement.setString(5, court.getLocation());
-        statement.setString(6, court.getImageUrl());
-        statement.setBoolean(7, court.isAvailableForReservations());
-        statement.setDouble(8, court.getPricePerHour());
+        setPreparedStatement(statement,court);
 
         statement.executeUpdate();
 
@@ -39,17 +32,10 @@ public class CourtMapper implements DataMapper<Court> {
 
     @Override
     public void update(Court court, Connection connection) throws SQLException {
-        String sql = "UPDATE courts SET name = ?, court_number = ?, surface_type = ?, has_roof = ?, location = ?, image_url = ?, available_for_reservations = ?, price_per_hour = ? WHERE id = ?".formatted();
+        String sql = "UPDATE courts SET name = ?, court_number = ?, surface_type = ?, has_roof = ?, location = ?, image_url = ?, available_for_reservations = ?, price_per_hour = ? WHERE id = ?";
 
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setString(1, court.getName());
-        statement.setInt(2, court.getCourtNumber());
-        statement.setString(3, court.getSurfaceType().name());
-        statement.setBoolean(4, court.hasRoof());
-        statement.setString(5, court.getLocation());
-        statement.setString(6, court.getImageUrl());
-        statement.setBoolean(7, court.isAvailableForReservations());
-        statement.setDouble(8, court.getPricePerHour());
+        setPreparedStatement(statement,court);
         statement.setLong(9, court.getId());
 
         statement.executeUpdate();
@@ -57,7 +43,7 @@ public class CourtMapper implements DataMapper<Court> {
 
     @Override
     public void delete(Court court, Connection connection) throws SQLException {
-        String sql = "DELETE FROM courts WHERE id = ?".formatted();
+        String sql = "DELETE FROM courts WHERE id = ?";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1, court.getId());
         statement.executeUpdate();
@@ -78,7 +64,7 @@ public class CourtMapper implements DataMapper<Court> {
     }
 
     public Court findById(Long id, Connection connection) throws SQLException {
-        String sql = "SELECT * FROM courts WHERE id = ?".formatted();
+        String sql = "SELECT * FROM courts WHERE id = ?";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1, id);
 
@@ -92,7 +78,7 @@ public class CourtMapper implements DataMapper<Court> {
 
     public List<Court> findAllCourts(Connection connection) throws SQLException {
         List<Court> courts = new ArrayList<>();
-        String sql = "SELECT * FROM courts".formatted();
+        String sql = "SELECT * FROM courts";
         Statement statement = connection.createStatement();
         ResultSet rs = statement.executeQuery(sql);
 
@@ -142,6 +128,17 @@ public class CourtMapper implements DataMapper<Court> {
             courts.add(mapResultSetToCourt(rs));
         }
         return courts;
+    }
+
+    private void setPreparedStatement(PreparedStatement statement, Court court) throws SQLException{
+        statement.setString(1, court.getName());
+        statement.setInt(2, court.getCourtNumber());
+        statement.setString(3, court.getSurfaceType().name());
+        statement.setBoolean(4, court.hasRoof());
+        statement.setString(5, court.getLocation());
+        statement.setString(6, court.getImageUrl());
+        statement.setBoolean(7, court.isAvailableForReservations());
+        statement.setDouble(8, court.getPricePerHour());
     }
 
 }

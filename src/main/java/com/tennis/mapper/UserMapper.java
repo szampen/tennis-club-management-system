@@ -1,6 +1,5 @@
 package com.tennis.mapper;
 
-import com.tennis.database.IdentityMap;
 import com.tennis.domain.Admin;
 import com.tennis.domain.Player;
 import com.tennis.domain.User;
@@ -51,7 +50,7 @@ public class UserMapper implements DataMapper<User>{
 
     @Override
     public void update(User user, Connection connection) throws SQLException{
-        String sql = "UPDATE users SET email = ?, password = ?, first_name = ?, last_name = ?, phone_number = ?, ranking_points = ? WHERE id = ?";
+        String sql = "UPDATE users SET email = ?, password = ?, first_name = ?, last_name = ?, phone_number = ?, ranking_points = ? WHERE id = ? AND deleted_at IS NULL";
 
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setString(1, user.getEmail());
@@ -73,7 +72,7 @@ public class UserMapper implements DataMapper<User>{
 
     @Override
     public void delete(User user, Connection connection) throws SQLException{
-        String sql = "DELETE FROM users WHERE id = ?";
+        String sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1,user.getId());
         statement.executeUpdate();
@@ -107,7 +106,7 @@ public class UserMapper implements DataMapper<User>{
 
     public List<User> findAllUsers(Connection connection) throws SQLException{
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM users WHERE deleted_at IS NULL";
         Statement statement = connection.createStatement();
         ResultSet rs = statement.executeQuery(sql);
 
@@ -118,6 +117,21 @@ public class UserMapper implements DataMapper<User>{
         return users;
     }
 
+    //TODO: mapping to user makes sense???
+    public List<Player> findByTournament(Long tournamentId, Connection connection) throws SQLException{
+        List<Player> players = new ArrayList<>();
+        String sql = "SELECT u.* FROM users u INNER JOIN tournament_participants tp ON u.id = tp.user_id WHERE tp.tournament_id = ? AND u.deleted_at IS NULL";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setLong(1, tournamentId);
+
+        ResultSet rs = statement.executeQuery();
+        while(rs.next()){
+            players.add((Player) mapResultSetToUser(rs));
+        }
+        return players;
+    }
+
+
     public User findUserById(Long id, Connection connection) throws SQLException{
         /*
         if(identityMap.contains(User.class,id)){
@@ -126,7 +140,7 @@ public class UserMapper implements DataMapper<User>{
 
         */
 
-        String sql = "SELECT * FROM users WHERE id = ?";
+        String sql = "SELECT * FROM users WHERE id = ? AND deleted_at IS NULL";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1,id);
 
@@ -141,7 +155,7 @@ public class UserMapper implements DataMapper<User>{
     }
 
     public User findUserbyEmail(String email, Connection connection) throws SQLException{
-        String sql = "SELECT * FROM users WHERE email = ?";
+        String sql = "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setString(1, email);
 

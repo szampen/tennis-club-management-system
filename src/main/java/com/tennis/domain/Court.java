@@ -1,5 +1,7 @@
 package com.tennis.domain;
 
+import java.util.Objects;
+
 public class Court {
     private Long id;
     private String name;
@@ -83,5 +85,18 @@ public class Court {
 
     public void setPricePerHour(Double price){
         this.pricePerHour = price;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        Court court = (Court) object;
+        if (id == null || court.id == null) return false;
+        return Objects.equals(id, court.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

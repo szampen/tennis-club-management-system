@@ -1,6 +1,7 @@
 package com.tennis.domain;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Reservation {
     private Long id;
@@ -9,14 +10,13 @@ public class Reservation {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private ReservationStatus status;
+    private LocalDateTime expiresAt;
 
     private Payment payment;
 
     private boolean paymentLoaded = false;
 
-    public Reservation(){
-        this.status = ReservationStatus.ACTIVE;
-    }
+    public Reservation(){}
 
     public void cancel(){
         if(this.status == ReservationStatus.ACTIVE){
@@ -27,6 +27,7 @@ public class Reservation {
         }
     }
 
+    //TODO: check
     public void complete(){
         if (LocalDateTime.now().isAfter(this.endTime)){
             this.status = ReservationStatus.COMPLETED;
@@ -85,6 +86,7 @@ public class Reservation {
         this.status = status;
     }
 
+    //TODO: check
     public Payment getPayment(){
         return payment;
     }
@@ -96,5 +98,26 @@ public class Reservation {
 
     public boolean isPaymentLoaded() {
         return paymentLoaded;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        Reservation that = (Reservation) object;
+        if(id == null || that.id == null) return false;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

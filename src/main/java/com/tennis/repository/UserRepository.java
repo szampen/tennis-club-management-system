@@ -1,6 +1,6 @@
 package com.tennis.repository;
 
-import com.tennis.database.DatabaseConnection;
+import com.tennis.domain.Player;
 import com.tennis.domain.User;
 import com.tennis.mapper.UserMapper;
 import org.springframework.stereotype.Repository;
@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public class UserRepository {
-    private UserMapper mapper = new UserMapper();
+    private final UserMapper mapper = new UserMapper();
 
     public User findById(Long id, Connection connection){
         try{
@@ -33,6 +33,14 @@ public class UserRepository {
             return mapper.findAllUsers(connection);
         } catch (Exception e){
             throw new RuntimeException("Error fetching users list.", e);
+        }
+    }
+
+    public List<Player> findByTournament(Long tournamentId,Connection connection){
+        try{
+            return mapper.findByTournament(tournamentId,connection);
+        } catch (Exception e){
+            throw new RuntimeException("Error fetching players list.", e);
         }
     }
 

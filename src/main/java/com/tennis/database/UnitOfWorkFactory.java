@@ -11,6 +11,8 @@ public class UnitOfWorkFactory {
         uow.registerMapper(Court.class, new CourtMapper());
         uow.registerMapper(Reservation.class, new ReservationMapper());
         uow.registerMapper(Payment.class, new PaymentMapper());
+        uow.registerMapper(Tournament.class, new TournamentMapper());
+        uow.registerMapper(Match.class,new MatchMapper());
 
         return uow;
     }
