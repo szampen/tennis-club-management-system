@@ -8,7 +8,7 @@ public class Court {
     private int courtNumber;
     private SurfaceType surfaceType;
     private boolean hasRoof;
-    private String location; //TODO
+    private String location;
     private String imageUrl; //TODO
     private boolean availableForReservations;
     private Double pricePerHour;

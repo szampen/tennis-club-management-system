@@ -71,10 +71,21 @@ public class UserMapper implements DataMapper<User>{
     }
 
     @Override
-    public void delete(User user, Connection connection) throws SQLException{
-        String sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?";
+    public void delete(User user, Connection connection) throws SQLException {
+        String suffix = "_" + System.currentTimeMillis() + "_deleted";
+
+        String sql = "UPDATE users SET " +
+                "deleted_at = NOW(), " +
+                "email = CONCAT(email, ?), " + // Changes maciek@test.pl into maciek@test.pl_123456_deleted
+                "phone_number = NULL, " +
+                "password = 'DELETED', " +
+                "first_name = 'Deleted', " +
+                "last_name = 'User' " +
+                "WHERE id = ?";
+
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setLong(1,user.getId());
+        statement.setString(1, suffix);
+        statement.setLong(2, user.getId());
         statement.executeUpdate();
     }
 

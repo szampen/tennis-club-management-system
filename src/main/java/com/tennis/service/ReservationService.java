@@ -168,6 +168,8 @@ public class ReservationService {
         }
     }
 
+    //TODO: give the closest free slot for user
+    //TODO: reservations for more tha one slot
     public ApiResponse getCourtAvailability(Long courtId, LocalDate date){
         try{
             Court court = courtRepository.findById(courtId, DatabaseConnection.getConnection());

@@ -174,6 +174,7 @@ public class TournamentService{
         }
     }
 
+    //TODO: think about payments
     public ApiResponse registerForTournament(Long userId, Long tournamentId) {
         UnitOfWork uow = null;
         try {

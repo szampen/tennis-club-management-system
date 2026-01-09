@@ -1,5 +1,6 @@
 import {Link, useNavigate} from 'react-router-dom';
 import axios from 'axios';
+import '../styles/navbar.css'
 
 function Navbar({user,setUser}){
     const navigate = useNavigate();
@@ -8,28 +9,24 @@ function Navbar({user,setUser}){
         try{
             await axios.post('api/users/logout');
             setUser(null);
-            navigate('/login');
+            navigate('/');
         } catch (e){
             console.error("Logout failed", e);
         }
     }
 
     return (
-        <nav style={{ background: '#333', color: '#fff', padding: '10px', display: 'flex', justifyContent: 'space-between' }}>
-            <div>
-                <Link to="/">Tennis Club</Link>
-            </div>
-
-            <div>
+        <nav className="navbar">
+            <Link to="/" className="nav-logo">🎾 TENNIS CLUB</Link>
+            <div className="nav-links">
                 {user ? (
-                    <div>
-                        <span>Welcome, {user.firstName}!</span>
-                        <button onClick={logout}>Logout</button>
+                    <div className="user-info">
+                        <span>Hi, {user.firstName}!</span>
+                        <button className="btn-primary" onClick={logout}>Logout</button>
                     </div>
                 ) : (
                     <div>
-                        <Link to="/login">Log in</Link>
-                        <span> / </span>
+                        <Link to="/login">Login</Link>
                         <Link to="/register">Register</Link>
                     </div>
                 )}
