@@ -23,6 +23,7 @@ function Navbar({user,setUser}){
 
             <div className="navbar-section center">
                 <Link to="/players" className="nav-link-main">Find Players</Link>
+                <Link to="/courts/filtered" className="nav-link-main">Find Courts</Link>
             </div>
 
             <div className="navbar-section right">

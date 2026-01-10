@@ -3,6 +3,7 @@ package com.tennis.mapper;
 import com.tennis.domain.Court;
 import com.tennis.domain.SurfaceType;
 import com.tennis.util.CourtFilter;
+import com.tennis.util.CourtSort;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -108,11 +109,13 @@ public class CourtMapper implements DataMapper<Court> {
             params.add(filter.getAvailableForReservations());
         }
 
-        if (filter.getCourtSort() != null) {
-            sql.append(" ORDER BY")
+        String dir = (filter.getDirection() != null) ? filter.getDirection().name() : "ASC";
+
+        if (filter.getCourtSort() != null && filter.getCourtSort() != CourtSort.FIRSTDATE) {
+            sql.append(" ORDER BY ")
                     .append(filter.getCourtSort().toSql())
                     .append(" ")
-                    .append(filter.getDirection());
+                    .append(dir);
         }
 
         PreparedStatement statement = connection.prepareStatement(sql.toString());

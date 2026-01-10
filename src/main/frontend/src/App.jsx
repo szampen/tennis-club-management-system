@@ -8,6 +8,9 @@ import UserProfile from "./components/UserProfile.jsx";
 import ReservationDetails from "./components/ReservationDetails";
 import Settings from "./components/Settings.jsx";
 import PlayersList from "./components/PlayersList.jsx";
+import CourtList from "./components/CourtList.jsx";
+import CourtEdit from "./components/CourtEdit.jsx";
+import CourtCreate from "./components/CourtCreate.jsx";
 axios.defaults.withCredentials = true;
 
 function App(){
@@ -34,6 +37,9 @@ function App(){
                     <Route path="/user/:id" element={<UserProfile currentUser={user} />} />
                     <Route path="/reservation/:id" element={user ? <ReservationDetails /> : <Navigate to="/login" />} />
                     <Route path="/players" element={<PlayersList />} />
+                    <Route path="/courts/filtered" element={<CourtList user = {user}/>} />
+                    <Route path="/courts/new" element={<CourtCreate user={user} />} />
+                    <Route path="/courts/edit/:id" element={<CourtEdit user={user} />} />
                     <Route path="/" element={
                         user ? (
                             <div style={{textAlign: 'center', marginTop: '50px'}}>

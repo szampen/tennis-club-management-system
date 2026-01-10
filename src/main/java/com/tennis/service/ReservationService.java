@@ -204,8 +204,10 @@ public class ReservationService {
     //TODO: give the closest free slot for user
     //TODO: reservations for more tha one slot
     public ApiResponse getCourtAvailability(Long courtId, LocalDate date){
+        Connection conn = null;
         try{
-            Court court = courtRepository.findById(courtId, DatabaseConnection.getConnection());
+            conn = DatabaseConnection.getConnection();
+            Court court = courtRepository.findById(courtId, conn);
             if (court == null) return new ApiResponse(false, "Court not found.");
 
             List<TimeSlot> slots = generateTimeSlots(date);
@@ -213,7 +215,7 @@ public class ReservationService {
             LocalDateTime dayStart = date.atTime(0,0);
             LocalDateTime dayEnd = date.atTime(23,59);
 
-            List<Reservation> reservations = reservationRepository.findByCourtIdAndDateRange(courtId,dayStart,dayEnd,DatabaseConnection.getConnection());
+            List<Reservation> reservations = reservationRepository.findByCourtIdAndDateRange(courtId,dayStart,dayEnd,conn);
 
             for(Reservation reservation : reservations){
                 if(reservation.getStatus() == ReservationStatus.ACTIVE){
@@ -227,6 +229,8 @@ public class ReservationService {
 
         } catch (Exception e){
             return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
         }
     }
 
