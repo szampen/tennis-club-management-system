@@ -7,7 +7,7 @@ function Navbar({user,setUser}){
 
     const logout = async () => {
         try{
-            await axios.post('api/users/logout');
+            await axios.post('/api/users/logout');
             setUser(null);
             navigate('/');
         } catch (e){
@@ -17,11 +17,11 @@ function Navbar({user,setUser}){
 
     return (
         <nav className="navbar">
-            <Link to="/" className="nav-logo">🎾 TENNIS CLUB</Link>
+            <Link to="/" className="nav-logo">TENNIS CLUB</Link>
             <div className="nav-links">
                 {user ? (
                     <div className="user-info">
-                        <span>Hi, {user.firstName}!</span>
+                        <Link to={`/user/${user.id}`} className="nav-welcome">Hi, {user.firstName}!</Link>
                         <button className="btn-primary" onClick={logout}>Logout</button>
                     </div>
                 ) : (

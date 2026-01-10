@@ -1,16 +1,21 @@
 package com.tennis.dto;
 
 import com.tennis.domain.*;
+import com.tennis.repository.UserRepository;
 import com.tennis.util.SetScore;
 import com.tennis.util.TimeSlot;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DTOMapper {
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    private static final UserRepository userRepository = new UserRepository();
 
     public static UserDTO toUserDTO(User user){
         if (user == null) return null;
@@ -43,14 +48,22 @@ public class DTOMapper {
         return dto;
     }
 
-    public static ReservationDTO toReservationDTO(Reservation reservation) {
+    public static ReservationDetailsDTO toReservationDetailsDTO(Reservation reservation, Payment payment, Court court) {
         if (reservation == null) return null;
 
-        ReservationDTO dto = new ReservationDTO();
+        ReservationDetailsDTO dto = new ReservationDetailsDTO();
         dto.setId(reservation.getId());
         dto.setStartTime(reservation.getStartTime().format(DATE_FORMATTER));
         dto.setEndTime(reservation.getEndTime().format(DATE_FORMATTER));
         dto.setStatus(reservation.getStatus().name());
+
+        dto.setCourtName(court.getName());
+        dto.setCourtNumber(court.getCourtNumber());
+        dto.setCourtSurface(court.getSurfaceType().name());
+        dto.setCourtLocation(court.getLocation());
+        dto.setCourtHasRoof(court.hasRoof());
+
+        dto.setPayment(toPaymentDTO(payment));
 
         return dto;
     }
@@ -68,6 +81,18 @@ public class DTOMapper {
         }
 
         dto.setTransactionId(payment.getTransactionId());
+
+        return dto;
+    }
+
+    public static ReservationsListDTO toReservationsListDTO(Reservation reservation){
+        if (reservation == null) return null;
+
+        ReservationsListDTO dto = new ReservationsListDTO();
+        dto.setReservationId(reservation.getId());
+        dto.setStartTime(reservation.getStartTime().format(DATE_FORMATTER));
+        dto.setEndTime(reservation.getEndTime().format(DATE_FORMATTER));
+        dto.setStatus(reservation.getStatus().name());
 
         return dto;
     }
@@ -167,6 +192,44 @@ public class DTOMapper {
         if (match.getScheduledTime() != null) {
             dto.setScheduledTime(match.getScheduledTime().format(DATE_FORMATTER));
         }
+
+        return dto;
+    }
+
+    public static MatchListDTO toMatchListDTO(Long userId, Match match, Tournament tournament, String opponentName){
+        MatchListDTO dto = new MatchListDTO();
+        dto.setId(match.getId());
+        dto.setSets(match.getSets().stream()
+                .map(s -> s.getPlayer1Games() + ":" + s.getPlayer2Games())
+                .toList());
+
+        dto.setOpponentName(opponentName);
+
+        if(userId == match.getWinnerId()) dto.setWinOrLoss("WIN");
+        else dto.setWinOrLoss("LOSS");
+
+        dto.setTournamentName(tournament.getName());
+        dto.setRoundName(getRoundName(match.getRound(),tournament.getParticipants()));
+
+        return dto;
+    }
+
+    public static PlayerStatsDTO toPlayerStatsDTO(int w, int l, int sw, int sl, double mp, double sp, List<Tournament> tournamentsWon, List<MatchListDTO> matches){
+        PlayerStatsDTO dto = new PlayerStatsDTO();
+        dto.setWins(w);
+        dto.setLosses(l);
+        dto.setSetWins(sw);
+        dto.setSetLosses(sl);
+        dto.setMatch_percentage(mp);
+        dto.setSet_percentage(sp);
+
+        Map<Long,String> temp = new HashMap<>();
+        for(Tournament t : tournamentsWon){
+            temp.put(t.getId(),t.getName());
+        }
+        dto.setTournamentsWon(temp);
+
+        dto.setMatches(matches);
 
         return dto;
     }

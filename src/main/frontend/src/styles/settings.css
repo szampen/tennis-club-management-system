@@ -1,0 +1,102 @@
+.settings-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.settings-title {
+    color: var(--wimbledon-purple);
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.settings-card {
+    padding: 25px;
+    border-radius: 15px;
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.row-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.row-info label {
+    font-size: 0.8em;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.row-info span {
+    font-weight: 500;
+    font-size: 1.1em;
+}
+
+.row-info input {
+    padding: 8px;
+    border: 1px solid var(--wimbledon-green);
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+/* Buttons */
+.btn-edit { background: none; border: 1px solid var(--wimbledon-green); color: var(--wimbledon-green); border-radius: 15px; padding: 5px 15px; cursor: pointer; }
+.btn-save { background: var(--wimbledon-green); color: white; border: none; padding: 5px 15px; border-radius: 15px; margin-right: 5px; }
+.btn-cancel { background: #95a5a6; color: white; border: none; padding: 5px 15px; border-radius: 15px; }
+
+/* Danger Zone */
+.danger-zone {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 2px dashed #fab1a0;
+    text-align: center;
+}
+
+.btn-delete-init {
+    background: none;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.confirm-delete {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-confirm-delete { background: #e74c3c; color: white; border: none; padding: 10px; border-radius: 10px; }
+
+.security-info-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background-color: rgba(52, 152, 219, 0.1);
+    border-left: 4px solid #3498db;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.security-info-banner p {
+    margin: 0;
+    font-size: 0.85em;
+    color: #2c3e50;
+    line-height: 1.4;
+}

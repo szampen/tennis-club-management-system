@@ -37,7 +37,13 @@ public class ReservationMapper implements DataMapper<Reservation>{
     }
 
     @Override
-    public void update(Reservation reservation, Connection connection){}
+    public void update(Reservation reservation, Connection connection) throws SQLException{
+        String sql = "UPDATE reservations SET status = ? WHERE id = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, reservation.getStatus().name());
+        stmt.setLong(2, reservation.getId());
+        stmt.executeUpdate();
+    }
 
     @Override
     public void delete(Reservation reservation, Connection connection) throws SQLException{
@@ -58,7 +64,10 @@ public class ReservationMapper implements DataMapper<Reservation>{
         reservation.setStartTime(rs.getTimestamp("start_time").toLocalDateTime());
         reservation.setEndTime(rs.getTimestamp("end_time").toLocalDateTime());
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("status")));
-        reservation.setExpiresAt(rs.getTimestamp("expires_at").toLocalDateTime());
+
+        Timestamp ts = rs.getTimestamp("expires_at");
+        if(ts != null) reservation.setExpiresAt(ts.toLocalDateTime());
+
         return reservation;
     }
 

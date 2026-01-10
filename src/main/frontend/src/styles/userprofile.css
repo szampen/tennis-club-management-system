@@ -1,0 +1,186 @@
+.profile-wrapper {
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+/* button on the top */
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.btn-edit-top {
+    background: var(--wimbledon-purple);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(60, 16, 83, 0.2);
+}
+
+.btn-edit-top:hover {
+    background: var(--wimbledon-green);
+    transform: translateY(-2px);
+}
+
+/* Siatka dwóch kafelków */
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.vertical-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 600px; /* Fixed height of cards*/
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    border-top: 6px solid var(--wimbledon-purple);
+}
+
+.card-header h3 {
+    margin-top: 0;
+    margin-bottom: 0 !important;
+    padding-bottom: 5px; /
+    color: var(--wimbledon-purple);
+    border-bottom: 2px solid var(--wimbledon-cream);
+}
+
+.card-header {
+    margin-bottom: 5px !important;
+}
+
+/* Container with both sections */
+.stats-container-horizontal {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stats-summary-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 15px 10px;
+    background: var(--wimbledon-cream);
+    border-radius: 15px;
+    border: 1px solid var(--wimbledon-gray);
+}
+
+/* Circle green for matches */
+.stat-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 4px solid var(--wimbledon-green);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: white;
+}
+
+/* Violet for sets */
+.stat-circle.purple {
+    border-color: var(--wimbledon-purple);
+}
+
+.stat-circle strong {
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.stat-circle span {
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #666;
+}
+
+.mini-stats p {
+    margin: 4px 0;
+    font-size: 0.85rem;
+    color: #444;
+}
+
+.mini-stats strong {
+    color: var(--wimbledon-purple);
+}
+
+.vertical-scroll-list {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 10px;
+    max-height: 350px;
+}
+
+/* style of match and reservation cards */
+.match-card-mini, .reservation-card-mini {
+    padding: 15px;
+    border-radius: 12px;
+    background: #fdfdfd;
+    border: 1px solid var(--wimbledon-gray);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.match-card-mini.win { border-left: 5px solid var(--wimbledon-green); }
+.match-card-mini.loss { border-left: 5px solid #d32f2f; }
+
+.match-info {
+    display: flex;
+    flex-direction: column; /* elems vertically */
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.match-info small {
+    color: #666;
+    font-size: 0.85em;
+    display: block;
+}
+
+.reservation-card-mini:hover {
+    border-color: var(--wimbledon-purple);
+    cursor: pointer;
+}
+
+.res-date strong {
+    margin-right: 8px;
+    color: var(--wimbledon-purple);
+}
+
+.res-date span {
+    color: #555;
+    font-weight: 500;
+}
+
+.status-tag {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #eee;
+    font-weight: bold;
+}
+
+.status-tag.confirmed { background: #e6f4ea; color: green; }
+
+/* Scrollbar Style */
+.vertical-scroll-list::-webkit-scrollbar { width: 6px; }
+.vertical-scroll-list::-webkit-scrollbar-thumb { background: var(--wimbledon-gray); border-radius: 10px; }

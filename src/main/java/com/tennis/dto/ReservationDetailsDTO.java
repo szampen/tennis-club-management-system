@@ -1,14 +1,20 @@
 package com.tennis.dto;
 
-public class ReservationDTO {
+public class ReservationDetailsDTO {
     private Long id;
-    private String courtName;
-    private String courtSurface;
     private String startTime;
     private String endTime;
     private String status;
 
-    public ReservationDTO() {}
+    private String courtName;
+    private int courtNumber;
+    private String courtSurface;
+    private String courtLocation;
+    private boolean courtHasRoof;
+
+    private PaymentDTO payment;
+
+    public ReservationDetailsDTO() {}
 
     public Long getId() {
         return id;
@@ -58,4 +64,35 @@ public class ReservationDTO {
         this.status = status;
     }
 
+    public int getCourtNumber() {
+        return courtNumber;
+    }
+
+    public void setCourtNumber(int courtNumber) {
+        this.courtNumber = courtNumber;
+    }
+
+    public String getCourtLocation() {
+        return courtLocation;
+    }
+
+    public void setCourtLocation(String courtLocation) {
+        this.courtLocation = courtLocation;
+    }
+
+    public boolean isCourtHasRoof() {
+        return courtHasRoof;
+    }
+
+    public void setCourtHasRoof(boolean courtHasRoof) {
+        this.courtHasRoof = courtHasRoof;
+    }
+
+    public PaymentDTO getPayment() {
+        return payment;
+    }
+
+    public void setPayment(PaymentDTO payment) {
+        this.payment = payment;
+    }
 }

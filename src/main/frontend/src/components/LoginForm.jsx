@@ -11,7 +11,7 @@ const LoginForm = ({onLoginSuccess}) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post('api/users/login', {email,password});
+            const res = await axios.post('/api/users/login', {email,password});
             if (res.data.success){
                 onLoginSuccess(res.data.data);
                 navigate('/');

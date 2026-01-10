@@ -33,7 +33,7 @@ public class DesktopLauncher extends Application {
         // loading local spring server
         webView.getEngine().load("http://localhost:8080");
 
-        stage.setScene(new Scene(webView,1024,768));
+        stage.setScene(new Scene(webView,1400,800));
         stage.setTitle("Tennis Club Management System");
         stage.show();
     }

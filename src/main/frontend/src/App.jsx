@@ -4,6 +4,9 @@ import axios from 'axios';
 import Navbar from "./components/Navbar";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
+import UserProfile from "./components/UserProfile.jsx";
+import ReservationDetails from "./components/ReservationDetails";
+import Settings from "./components/Settings.jsx";
 axios.defaults.withCredentials = true;
 
 function App(){
@@ -11,7 +14,7 @@ function App(){
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get('api/users/me')
+        axios.get('/api/users/me')
             .then(res => setUser(res.data.data))
             .catch(() => setUser(null))
             .finally(() => setLoading(false))
@@ -26,6 +29,9 @@ function App(){
                 <Routes>
                     <Route path="/login" element = {!user ? <LoginForm onLoginSuccess={setUser}/> : <Navigate to="/"/>}/>
                     <Route path="/register" element={!user ? <RegisterForm /> : <Navigate to="/" />} />
+                    <Route path="/settings" element={<Settings user = {user} setUser={setUser}/>} />
+                    <Route path="/user/:id" element={<UserProfile currentUser={user} />} />
+                    <Route path="/reservation/:id" element={user ? <ReservationDetails /> : <Navigate to="/login" />} />
                     <Route path="/" element={
                         user ? (
                             <div style={{textAlign: 'center', marginTop: '50px'}}>

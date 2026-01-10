@@ -3,14 +3,17 @@ package com.tennis.service;
 import com.tennis.database.DatabaseConnection;
 import com.tennis.domain.Match;
 import com.tennis.domain.Player;
+import com.tennis.domain.Tournament;
 import com.tennis.domain.User;
 import com.tennis.dto.*;
 import com.tennis.repository.MatchRepository;
+import com.tennis.repository.TournamentRepository;
 import com.tennis.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.regex.Pattern;
@@ -20,10 +23,12 @@ import java.util.regex.Pattern;
 public class UserService {
     private final UserRepository userRepository;
     private final MatchRepository matchRepository;
+    private final TournamentRepository tournamentRepository;
 
-    public UserService(UserRepository userRepo, MatchRepository matchRepo){
+    public UserService(UserRepository userRepo, MatchRepository matchRepo, TournamentRepository tournamentRepository){
         this.userRepository = userRepo;
         this.matchRepository = matchRepo;
+        this.tournamentRepository = tournamentRepository;
     }
 
     private static final Pattern EMAIL_PATTERN =
@@ -88,6 +93,7 @@ public class UserService {
         }
     }
 
+    //TODO: is it needed?
     public ApiResponse getUser(Long id){
         Connection conn = null;
         try {
@@ -124,26 +130,7 @@ public class UserService {
         }
     }
 
-    //TODO
-    public ApiResponse getTournamentMatchesHistory(Long userId){
-        Connection conn = null;
-        try{
-            conn = DatabaseConnection.getConnection();
-            List<Match> matches = matchRepository.findByPlayer(userId, conn);
-
-            //List<MatchListDTO> matchListDTO = matches.stream().map(DTOMapper::toMatchList).collect(Collectors.toList());
-
-           // return new ApiResponse(true, "OK", matchListDTO);
-            return new ApiResponse(true, "OK");
-        } catch (Exception e){
-            return new ApiResponse(false, "Error: " + e.getMessage());
-        } finally {
-            DatabaseConnection.returnConnection(conn);
-        }
-    }
-
-    //TODO: tournaments Won
-    public ApiResponse getTournamentStatistics(Long userId){
+    public ApiResponse getPlayerStatistics(Long userId){
         Connection conn = null;
         try{
             conn = DatabaseConnection.getConnection();
@@ -152,13 +139,45 @@ public class UserService {
             int losses = matchRepository.countLosses(userId,conn);
             int setWin = matchRepository.countSetWon(userId,conn);
             int setLoss = matchRepository.countSetLost(userId,conn);
-            double match_percentage = (double) wins /losses;
-            double set_percentage = (double) setWin /setLoss;
+            double match_percentage;
+            double set_percentage;
+            if(losses == 0){
+                if(wins == 0) match_percentage = 0.0;
+                else match_percentage = 1.0;
+            } else {
+                match_percentage = (double) wins /(wins+losses);
+            }
+            if(setLoss == 0){
+                if(setWin == 0) set_percentage = 0.0;
+                else set_percentage = 1.0;
+            } else {
+                set_percentage = (double) setWin /(setWin+setLoss);
+            }
 
-            //statsDTO - setters
+            List<Tournament> tournamentsWon = tournamentRepository.tournamentsWonByUser(userId, conn);
+            for(Tournament t : tournamentsWon){
 
-            //return new ApiResponse(true, "OK", statsDTO);
-            return new ApiResponse(true, "OK");
+            }
+
+            List<Match> matches = matchRepository.findByPlayer(userId,conn);
+            List<MatchListDTO> matchDtos = new ArrayList<>();
+            for(Match m : matches){
+                Tournament temp = tournamentRepository.findById(m.getTournamentId(),conn);
+                String opponentName;
+                if(m.getPlayer1Id() == userId){
+                    User opponent = userRepository.findById(m.getPlayer2Id(),conn);
+                    opponentName = opponent.getFirstName() + " " + opponent.getLastName();
+                }
+                else{
+                    User opponent = userRepository.findById(m.getPlayer1Id(),conn);
+                    opponentName = opponent.getFirstName() + " " + opponent.getLastName();
+                }
+                matchDtos.add(DTOMapper.toMatchListDTO(userId,m,temp, opponentName));
+            }
+
+            PlayerStatsDTO statsDTO = DTOMapper.toPlayerStatsDTO(wins,losses,setWin,setLoss,match_percentage,set_percentage,tournamentsWon,matchDtos);
+
+            return new ApiResponse(true, "OK", statsDTO);
         } catch (Exception e){
             return new ApiResponse(false, "Error: " + e.getMessage());
         } finally {
@@ -166,6 +185,122 @@ public class UserService {
         }
     }
 
-    //TODO: public ApiResponse update() - create DTO, when frontend design is known
+    public ApiResponse changeEmail(Long userId, String email){
+        Connection conn = null;
+        try{
+            conn = DatabaseConnection.getConnection();
+
+            if(!EMAIL_PATTERN.matcher(email).matches()){
+                return new ApiResponse(false, "Invalid email format. Use: xxx@domain.xx");
+            }
+
+            User user = userRepository.findById(userId, conn);
+            if(user == null) return new ApiResponse(false, "User not found.");
+
+            user.setEmail(email);
+            userRepository.save(user,conn);
+
+            return new ApiResponse(true, "Email changed");
+        } catch (Exception e){
+            return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
+        }
+    }
+
+    public ApiResponse changePassword(Long userId, String password){
+        Connection conn = null;
+        try{
+            conn = DatabaseConnection.getConnection();
+
+            User user = userRepository.findById(userId, conn);
+            if(user == null) return new ApiResponse(false, "User not found.");
+
+            user.setPassword(BCrypt.hashpw(password,BCrypt.gensalt()));
+            userRepository.save(user,conn);
+
+            return new ApiResponse(true, "Password changed");
+        } catch (Exception e){
+            return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
+        }
+    }
+
+    public ApiResponse changeFirstName(Long userId, String firstName){
+        Connection conn = null;
+        try{
+            conn = DatabaseConnection.getConnection();
+
+            User user = userRepository.findById(userId, conn);
+            if(user == null) return new ApiResponse(false, "User not found.");
+
+            user.setFirstName(firstName);
+            userRepository.save(user,conn);
+
+            return new ApiResponse(true, "First name changed");
+        } catch (Exception e){
+            return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
+        }
+    }
+
+    public ApiResponse changeLastName(Long userId, String lastName){
+        Connection conn = null;
+        try{
+            conn = DatabaseConnection.getConnection();
+
+            User user = userRepository.findById(userId, conn);
+            if(user == null) return new ApiResponse(false, "User not found.");
+
+            user.setLastName(lastName);
+            userRepository.save(user,conn);
+
+            return new ApiResponse(true, "Last name changed");
+        } catch (Exception e){
+            return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
+        }
+    }
+
+    public ApiResponse changePhoneNumber(Long userId, String phoneNumber){
+        Connection conn = null;
+        try{
+            conn = DatabaseConnection.getConnection();
+
+            User user = userRepository.findById(userId, conn);
+            if(user == null) return new ApiResponse(false, "User not found.");
+
+            user.setPhoneNumber(phoneNumber);
+            userRepository.save(user,conn);
+
+            return new ApiResponse(true, "Phone number changed");
+        } catch (Exception e){
+            return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
+        }
+    }
+
+    public ApiResponse deleteUser(Long userId){
+        Connection conn = null;
+        try{
+            conn = DatabaseConnection.getConnection();
+
+            User user = userRepository.findById(userId, conn);
+            if(user == null) return new ApiResponse(false, "User not found.");
+
+            userRepository.delete(user,conn);
+
+            return new ApiResponse(true, "User deleted.");
+        } catch (Exception e){
+            return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
+        }
+    }
+
     //TODO: public ApiResponse delete() - soft-delete
 }

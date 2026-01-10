@@ -97,16 +97,41 @@ public class ReservationService {
 
             uow.commit();
 
-            ReservationDTO dto = DTOMapper.toReservationDTO(reservation);
-            dto.setCourtName(court.getName());
-            dto.setCourtSurface(court.getSurfaceType().name());
+            if(!request.isTournament()){
+                ReservationDetailsDTO dto = DTOMapper.toReservationDetailsDTO(reservation,paymentRepository.findByReservationId(reservation.getId(),uow.getConnection()), court);
+                return new ApiResponse(true, "Reservation created.", dto);
+            }
+            else {
+                ReservationsListDTO dto = DTOMapper.toReservationsListDTO(reservation);
+                return new ApiResponse(true, "Reservation created.", dto);
+            } //TODO: maybe change in the future
 
-            return new ApiResponse(true, "Reservation created.", dto);
         } catch (Exception e){
             if (uow != null) uow.rollback();
             return new ApiResponse(false, "Error creating reservation: " + e.getMessage());
         } finally {
             if (uow != null) uow.finish();
+        }
+    }
+
+    public ApiResponse getReservation(Long reservationId){
+        Connection conn = null;
+        try{
+            conn = DatabaseConnection.getConnection();
+
+            Reservation reservation = reservationRepository.findById(reservationId, conn);
+
+            Payment payment = paymentRepository.findByReservationId(reservationId,conn);
+
+            Court court = courtRepository.findById(reservation.getCourtId(),conn);
+
+            ReservationDetailsDTO dto = DTOMapper.toReservationDetailsDTO(reservation, payment, court);
+
+            return new ApiResponse(true, "OK", dto);
+        } catch (Exception e){
+            return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            DatabaseConnection.returnConnection(conn);
         }
     }
 
@@ -116,8 +141,11 @@ public class ReservationService {
             conn = DatabaseConnection.getConnection();
 
             List<Reservation> reservations = reservationRepository.findByUserId(userId,conn);
+            if (reservations == null) {
+                return new ApiResponse(true, "No reservations found", new ArrayList<>());
+            }
             checkReservations(reservations,conn);
-            List<ReservationDTO> dtos = reservations.stream().map(DTOMapper::toReservationDTO).toList();
+            List<ReservationsListDTO> dtos = reservations.stream().map(DTOMapper::toReservationsListDTO).toList();
 
             return new ApiResponse(true, "OK", dtos);
         } catch (Exception e){
@@ -134,7 +162,7 @@ public class ReservationService {
 
             List<Reservation> reservations = reservationRepository.findByCourtId(courtId,conn);
             checkReservations(reservations, conn);
-            List<ReservationDTO> dtos = reservations.stream().map(DTOMapper::toReservationDTO).toList();
+            List<ReservationsListDTO> dtos = reservations.stream().map(DTOMapper::toReservationsListDTO).toList();
 
             return new ApiResponse(true, "OK", dtos);
         } catch (Exception e){
@@ -145,9 +173,10 @@ public class ReservationService {
     }
 
     public ApiResponse cancelReservation(Long reservationId, Long userId){
-        Connection conn = null;
+        UnitOfWork uow = null;
         try{
-            conn = DatabaseConnection.getConnection();
+            uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
 
             Reservation reservation = reservationRepository.findById(reservationId,conn);
             if(reservation == null) return new ApiResponse(false,"Reservation not found.");
@@ -159,12 +188,16 @@ public class ReservationService {
             }
 
             reservation.cancel();
+            uow.registerDirty(reservation);
+            uow.registerDirty(reservation.getPayment());
 
+            uow.commit();
             return new ApiResponse(true, "Reservation cancelled");
         } catch (Exception e){
+            if (uow != null) uow.rollback();
             return new ApiResponse(false, "Error: " + e.getMessage());
         } finally {
-            DatabaseConnection.returnConnection(conn);
+            if (uow != null) uow.finish();
         }
     }
 

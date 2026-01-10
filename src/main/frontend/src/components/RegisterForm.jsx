@@ -20,7 +20,7 @@ const RegisterForm = () => {
 
         setInfo({ message: '', isSuccess: false });
         try {
-            const res = await axios.post('api/users/register', formData);
+            const res = await axios.post('/api/users/register', formData);
             if (res.data.success) {
                 setInfo({ message: res.data.message + " Redirecting...", isSuccess: true });
                 setTimeout(() => navigate('/login'), 2000);

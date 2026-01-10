@@ -151,7 +151,7 @@ public class UserMapper implements DataMapper<User>{
 
         */
 
-        String sql = "SELECT * FROM users WHERE id = ? AND deleted_at IS NULL";
+        String sql = "SELECT * FROM users WHERE id = ?";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1,id);
 
@@ -184,5 +184,5 @@ public class UserMapper implements DataMapper<User>{
         }
         return null;
     }
-    //TODO: find by email/name etc. if needed
+    //TODO: findByFullName
 }
