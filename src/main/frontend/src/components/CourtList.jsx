@@ -123,6 +123,7 @@ const CourtList = ({ user }) => {
                         >
                             <option value="COURTNUMBER">Court Number</option>
                             <option value="FIRSTDATE">Availability Date</option>
+                            <option value="PRICE">Price Per Hour</option>
                         </select>
 
                         <button

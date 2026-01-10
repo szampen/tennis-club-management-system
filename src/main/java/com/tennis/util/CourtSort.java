@@ -2,7 +2,8 @@ package com.tennis.util;
 
 public enum CourtSort {
     COURTNUMBER("court_number"),
-    FIRSTDATE("firstdate");
+    FIRSTDATE("firstdate"),
+    PRICE("price_per_hour");
 
 
     private final String sql;
