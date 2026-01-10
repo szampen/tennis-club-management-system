@@ -17,17 +17,24 @@ function Navbar({user,setUser}){
 
     return (
         <nav className="navbar">
-            <Link to="/" className="nav-logo">TENNIS CLUB</Link>
-            <div className="nav-links">
+            <div className="navbar-section left">
+                <Link to="/" className="nav-logo">TENNIS CLUB</Link>
+            </div>
+
+            <div className="navbar-section center">
+                <Link to="/players" className="nav-link-main">Find Players</Link>
+            </div>
+
+            <div className="navbar-section right">
                 {user ? (
                     <div className="user-info">
                         <Link to={`/user/${user.id}`} className="nav-welcome">Hi, {user.firstName}!</Link>
-                        <button className="btn-primary" onClick={logout}>Logout</button>
+                        <button className="btn-logout" onClick={logout}>Logout</button>
                     </div>
                 ) : (
-                    <div>
-                        <Link to="/login">Login</Link>
-                        <Link to="/register">Register</Link>
+                    <div className="auth-links">
+                        <Link to="/login" className="nav-link-auth">Login</Link>
+                        <Link to="/register" className="btn-register">Register</Link>
                     </div>
                 )}
             </div>

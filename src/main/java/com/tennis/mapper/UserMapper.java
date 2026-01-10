@@ -117,7 +117,7 @@ public class UserMapper implements DataMapper<User>{
 
     public List<User> findAllUsers(Connection connection) throws SQLException{
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users WHERE deleted_at IS NULL";
+        String sql = "SELECT * FROM users WHERE deleted_at IS NULL AND user_type != 'ADMIN' ORDER BY ranking_points DESC";
         Statement statement = connection.createStatement();
         ResultSet rs = statement.executeQuery(sql);
 

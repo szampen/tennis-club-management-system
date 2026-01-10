@@ -37,6 +37,7 @@ const UserProfile = ({ currentUser }) => {
 
     return (
         <div className="profile-wrapper">
+            <button className="btn-back" onClick={() => navigate(-1)}>← Back</button>
             {/* Action bar on top of the boxes */}
             {isOwnProfile && (
                 <div className="profile-actions">
@@ -126,7 +127,7 @@ const UserProfile = ({ currentUser }) => {
                                     </div>
                                     <span className={`status-tag ${res.status.toLowerCase()}`}>{res.status}</span>
                                 </div>
-                            )) : <p className="empty-msg">No upcoming reservations.</p>}
+                            )) : <p className="empty-msg">No reservations.</p>}
                         </div>
                     ) : (
                         <div className="guest-view">

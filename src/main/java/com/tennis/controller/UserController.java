@@ -52,6 +52,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getPlayerStatistics(id));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
     @PutMapping("/change-email")
     public ResponseEntity<ApiResponse> changeEmail(@RequestBody java.util.Map<String, String> body, HttpSession session) {
         Object userObj = session.getAttribute("user");
