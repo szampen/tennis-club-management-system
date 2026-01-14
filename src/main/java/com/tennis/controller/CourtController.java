@@ -1,13 +1,14 @@
 package com.tennis.controller;
 
-import com.tennis.domain.User;
 import com.tennis.dto.ApiResponse;
 import com.tennis.dto.CourtDTO;
 import com.tennis.service.CourtService;
 import com.tennis.util.CourtFilter;
-import jakarta.servlet.http.HttpSession;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/courts")
@@ -34,48 +35,47 @@ public class CourtController {
     }
 
     @PostMapping
-    public ApiResponse createCourt(@RequestBody CourtDTO courtDTO, HttpSession session) {
-        Object user = session.getAttribute("user");
-        if (user == null) return new ApiResponse(false, "Not logged in");
-
-        Long adminId = ((com.tennis.dto.UserDTO) user).getId();
-        return courtService.createCourt(courtDTO, adminId);
+    public ResponseEntity<ApiResponse> createCourt(@RequestBody CourtDTO courtDTO, @RequestParam Long userId) {
+        return ResponseEntity.ok(courtService.createCourt(courtDTO, userId));
     }
 
     @PutMapping("/{id}/update")
-    public ApiResponse updateCourt(@PathVariable Long id, @RequestBody CourtDTO updates, HttpSession session) {
-        Object userObj = session.getAttribute("user");
-        if (userObj == null) return new ApiResponse(false, "Not logged in");
-
-        Long adminId = ((com.tennis.dto.UserDTO) userObj).getId();
+    public ApiResponse updateCourt(@PathVariable Long id, @RequestBody CourtDTO updates, @RequestParam Long userId) {
         boolean updatedAny = false;
 
         if (updates.getName() != null) {
-            courtService.changeName(id,adminId, updates.getName());
+            ApiResponse res = courtService.changeName(id,userId, updates.getName());
+            if(!res.isSuccess()) return res;
             updatedAny = true;
         }
         if (updates.getCourtNumber() != null && updates.getCourtNumber() != 0) {
-            courtService.changeCourtNumber(id,adminId, updates.getCourtNumber());
+            ApiResponse res = courtService.changeCourtNumber(id,userId, updates.getCourtNumber());
+            if(!res.isSuccess()) return res;
             updatedAny = true;
         }
         if (updates.getLocation() != null) {
-            courtService.changeLocation(id, adminId, updates.getLocation());
+            ApiResponse res = courtService.changeLocation(id, userId, updates.getLocation());
+            if(!res.isSuccess()) return res;
             updatedAny = true;
         }
         if (updates.getPricePerHour() != null && updates.getPricePerHour() > 0) {
-            courtService.changePricePerHour(id, adminId, updates.getPricePerHour());
+            ApiResponse res = courtService.changePricePerHour(id, userId, updates.getPricePerHour());
+            if(!res.isSuccess()) return res;
             updatedAny = true;
         }
         if (updates.getSurfaceType() != null) {
-            courtService.changeSurfaceType(id, adminId, updates.getSurfaceType());
+            ApiResponse res = courtService.changeSurfaceType(id, userId, updates.getSurfaceType());
+            if(!res.isSuccess()) return res;
             updatedAny = true;
         }
         if (updates.isHasRoof() != null) {
-            courtService.changeHasRoof(id, adminId, updates.isHasRoof());
+            ApiResponse res = courtService.changeHasRoof(id, userId, updates.isHasRoof());
+            if(!res.isSuccess()) return res;
             updatedAny = true;
         }
         if (updates.isAvailableForReservations() != null) {
-            courtService.changeAvailableForReservations(id, adminId, updates.isAvailableForReservations());
+            ApiResponse res = courtService.changeAvailableForReservations(id, userId, updates.isAvailableForReservations());
+            if(!res.isSuccess()) return res;
             updatedAny = true;
         }
 
@@ -87,12 +87,12 @@ public class CourtController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse deleteCourt(@PathVariable Long id, HttpSession session) {
-        Object user = session.getAttribute("user");
-        if (user == null) {
-            return new ApiResponse(false, "Not logged in");
-        }
-        Long userId = ((com.tennis.dto.UserDTO) user).getId();
-        return courtService.deleteCourt(id, userId);
+    public ResponseEntity<ApiResponse> deleteCourt(@PathVariable Long id, @RequestParam Long userId) {
+        return ResponseEntity.ok(courtService.deleteCourt(id, userId));
+    }
+
+    @GetMapping("/{id}/availability")
+    public ResponseEntity<ApiResponse> getAvailability(@PathVariable Long id, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(courtService.getCourtAvailability(id, date,null));
     }
 }

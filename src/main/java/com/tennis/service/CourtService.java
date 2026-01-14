@@ -3,10 +3,7 @@ package com.tennis.service;
 import com.tennis.database.DatabaseConnection;
 import com.tennis.database.UnitOfWork;
 import com.tennis.database.UnitOfWorkFactory;
-import com.tennis.domain.Court;
-import com.tennis.domain.Reservation;
-import com.tennis.domain.SurfaceType;
-import com.tennis.domain.User;
+import com.tennis.domain.*;
 import com.tennis.dto.ApiResponse;
 import com.tennis.dto.CourtDTO;
 import com.tennis.dto.DTOMapper;
@@ -18,27 +15,33 @@ import com.tennis.repository.UserRepository;
 import com.tennis.util.CourtFilter;
 import com.tennis.util.CourtSort;
 import com.tennis.util.SortDirection;
+import com.tennis.util.TimeSlot;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class CourtService {
-    private final CourtRepository courtRepository = new CourtRepository();
-    private final UserRepository userRepository = new UserRepository();
-    private final ReservationService reservationService;
+    private final CourtRepository courtRepository;
+    private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final PaymentRepository paymentRepository;
 
-    public CourtService(ReservationService reservationService, ReservationRepository reservationRepository, PaymentRepository paymentRepository) {
-        this.reservationService = reservationService;
-        this.reservationRepository = reservationRepository;
-        this.paymentRepository = paymentRepository;
-    }
+    private static final int OPENING_HOUR = 10;
+    private static final int CLOSING_HOUR = 22;
+    private static final int SLOT_DURATION = 1;
 
+    public CourtService() {
+        this.reservationRepository = new ReservationRepository();
+        this.paymentRepository = new PaymentRepository();
+        this.userRepository = new UserRepository();
+        this.courtRepository = new CourtRepository();
+    }
 
     public ApiResponse getAllCourts(){
         Connection conn = null;
@@ -48,7 +51,8 @@ public class CourtService {
             List<Court> courts = courtRepository.findAll(conn);
             List<CourtDTO> courtDTOS = courts.stream().map(DTOMapper::toCourtDTO).toList();
 
-            courtDTOS.parallelStream().forEach(this::setFirstAvailableDate);
+            Connection finalConn = conn;
+            courtDTOS.forEach(dto -> setFirstAvailableDate(dto, finalConn));
 
             return new ApiResponse(true, "OK", courtDTOS);
         } catch (Exception e){
@@ -66,7 +70,8 @@ public class CourtService {
             List<Court> courts = courtRepository.findByFilter(filter,conn);
             List<CourtDTO> courtDTOS = courts.stream().map(DTOMapper::toCourtDTO).toList();
 
-            courtDTOS.forEach(this::setFirstAvailableDate);
+            Connection finalConn = conn;
+            courtDTOS.forEach(dto -> setFirstAvailableDate(dto, finalConn));
 
             if(filter.getCourtSort() == CourtSort.FIRSTDATE){
                 if(filter.getDirection() == SortDirection.ASC){
@@ -102,6 +107,7 @@ public class CourtService {
             if(court == null) return new ApiResponse(false, "Court not found.");
 
             CourtDTO dto = DTOMapper.toCourtDTO(court);
+            setFirstAvailableDate(dto,conn);
 
             return new ApiResponse(true, "OK", dto);
         } catch (Exception e) {
@@ -112,9 +118,10 @@ public class CourtService {
     }
 
     public ApiResponse createCourt(CourtDTO courtDTO, Long adminId){
-        Connection conn = null;
+        UnitOfWork uow = null;
         try{
-            conn = DatabaseConnection.getConnection();
+            uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
 
             if (courtDTO.getName() == null || courtDTO.getName().isBlank()) {
                 return new ApiResponse(false, "Court name is required");
@@ -144,14 +151,16 @@ public class CourtService {
             court.setImageUrl(courtDTO.getImageUrl());
             court.setPricePerHour(courtDTO.getPricePerHour());
 
-            courtRepository.save(court, conn);
+            uow.registerNew(court);
+            uow.commit();
 
             CourtDTO dto = DTOMapper.toCourtDTO(court);
             return new ApiResponse(true, "Court created.", dto);
         } catch (Exception e){
+            if (uow != null) uow.rollback();
             return new ApiResponse(false, "Error: " + e.getMessage());
         } finally {
-            DatabaseConnection.returnConnection(conn);
+            if (uow != null) uow.finish();
         }
     }
 
@@ -387,13 +396,79 @@ public class CourtService {
         }
     }
 
+    public ApiResponse getCourtAvailability(Long courtId, LocalDate date,Connection conn){
+        boolean isnull = false;
+        try{
+            if(conn == null){
+                conn = DatabaseConnection.getConnection();
+                isnull = true;
+            }
+
+            Court court = courtRepository.findById(courtId, conn);
+            if (court == null) return new ApiResponse(false, "Court not found.");
+
+            List<TimeSlot> slots = generateTimeSlots(date);
+
+            LocalDateTime dayStart = date.atTime(0,0);
+            LocalDateTime dayEnd = date.atTime(23,59);
+
+            List<Reservation> reservations = reservationRepository.findByCourtIdAndDateRange(courtId,dayStart,dayEnd,conn);
+
+            for(Reservation reservation : reservations){
+                if(reservation.getStatus() == ReservationStatus.ACTIVE || reservation.getStatus() == ReservationStatus.HOLD){
+                    markSlotAsOccupied(slots,reservation);
+                }
+            }
+
+            List<TimeSlotDTO> dto = slots.stream().map(DTOMapper::toTimeSlotDTO).toList();
+
+            return new ApiResponse(true, "OK", dto);
+
+        } catch (Exception e){
+            return new ApiResponse(false, "Error: " + e.getMessage());
+        } finally {
+            if(isnull) DatabaseConnection.returnConnection(conn);
+        }
+    }
+
+    private List<TimeSlot> generateTimeSlots(LocalDate date){
+        List<TimeSlot> slots = new ArrayList<>();
+
+        for(int hour = OPENING_HOUR; hour < CLOSING_HOUR; hour+=SLOT_DURATION){
+            LocalDateTime start = date.atTime(hour, 0);
+            LocalDateTime end = start.plusHours(SLOT_DURATION);
+
+            slots.add(new TimeSlot(start,end));
+        }
+
+        return slots;
+    }
+
+    private void markSlotAsOccupied(List<TimeSlot> slots, Reservation reservation){
+        for(TimeSlot slot : slots){
+            if(reservationOverlapsSlot(reservation, slot)){
+                slot.setAvailable(false);
+                slot.setReservationId(reservation.getId());
+            }
+        }
+    }
+
+    private boolean reservationOverlapsSlot(Reservation reservation, TimeSlot slot){
+        LocalDateTime resStart = reservation.getStartTime();
+        LocalDateTime resEnd = reservation.getEndTime();
+        LocalDateTime slotStart = slot.getStartTime();
+        LocalDateTime slotEnd = slot.getEndTime();
+
+        return resStart.isBefore(slotEnd) && resEnd.isAfter(slotStart);
+    }
+
     @SuppressWarnings("unchecked")
-    private void setFirstAvailableDate(CourtDTO dto) {
+    private void setFirstAvailableDate(CourtDTO dto, Connection connection) {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalDate endLimit = date.plusYears(1);
 
         while (date.isBefore(endLimit)) {
-            ApiResponse response = reservationService.getCourtAvailability(dto.getId(), date);
+            ApiResponse response = getCourtAvailability(dto.getId(), date,connection);
 
             if (response.isSuccess() && response.getData() instanceof List) {
                 List<TimeSlotDTO> slots = (List<TimeSlotDTO>) response.getData();

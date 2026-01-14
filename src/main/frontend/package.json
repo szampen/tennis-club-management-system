@@ -1,15 +1,21 @@
 {
   "name": "tennis-club-management-system",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "author" : "",
+  "description": "Tennis Club Management System",
+  "version": "1.0.0",
+  "main": "main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron": "electron .",
+    "build-exe": "vite build && electron-builder"
   },
   "dependencies": {
+    "@g-loot/react-tournament-brackets": "1.0.31-rc",
+    "styled-components": "^6.3.5",
+    "react-svg-pan-zoom": "^3.13.1",
+    "react-image-magnifiers": "^1.4.0",
     "axios": "^1.13.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -20,10 +26,37 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "electron": "^33.0.0",
+    "electron-builder": "^24.13.3",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "vite": "^7.2.4"
+  },
+  "build": {
+    "appId": "com.tennis.app",
+    "productName": "Tennis Club Manager",
+    "asar" : false,
+    "directories": {
+      "output": "dist-electron"
+    },
+    "win": {
+      "target": "portable",
+      "artifactName" : "${productName}.${ext}",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../../../target/backend.jar",
+        "to": "backend.jar"
+      },
+      { "from": "../resources/jre", "to": "jre" }
+    ]
   }
 }

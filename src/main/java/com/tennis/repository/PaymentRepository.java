@@ -8,7 +8,11 @@ import java.sql.Connection;
 
 @Repository
 public class PaymentRepository {
-    private final PaymentMapper mapper = new PaymentMapper();
+    private final PaymentMapper mapper;
+
+    public PaymentRepository(){
+        this.mapper = new PaymentMapper();
+    }
 
     public Payment findById(Long id, Connection connection) {
         try {

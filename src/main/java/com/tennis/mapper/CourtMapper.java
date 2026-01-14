@@ -9,7 +9,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO: use of identity map
 public class CourtMapper implements DataMapper<Court> {
 
     @Override

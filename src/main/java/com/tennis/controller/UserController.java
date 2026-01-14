@@ -5,7 +5,6 @@ import com.tennis.dto.LoginRequest;
 import com.tennis.dto.RegisterRequest;
 import com.tennis.dto.UserDTO;
 import com.tennis.service.UserService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,27 +23,18 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest request, HttpSession session){
-        ApiResponse response = userService.login(request);
-        if(response.isSuccess()){
-            session.setAttribute("user",response.getData());
-        }
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest request){
+        return ResponseEntity.ok(userService.login(request));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse> logout(HttpSession session){
-        session.invalidate();
+    public ResponseEntity<ApiResponse> logout(){
         return ResponseEntity.ok(new ApiResponse(true, "Logged out successfully."));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse> getMe(HttpSession session){
-        Object user = session.getAttribute("user");
-        if(user == null){
-            return ResponseEntity.status(401).body(new ApiResponse(false, "Not logged in."));
-        }
-        return ResponseEntity.ok(new ApiResponse(true, "Active session.", user));
+    public ResponseEntity<ApiResponse> getMe(@RequestParam Long userId) {
+        return ResponseEntity.ok(userService.getUser(userId));
     }
 
     @GetMapping("/{id}/stats")
@@ -58,33 +48,17 @@ public class UserController {
     }
 
     @PutMapping("/change-email")
-    public ResponseEntity<ApiResponse> changeEmail(@RequestBody java.util.Map<String, String> body, HttpSession session) {
-        Object userObj = session.getAttribute("user");
-        if (userObj == null) return ResponseEntity.status(401).body(new ApiResponse(false, "Unauthorized"));
-
-        Long userId = ((com.tennis.dto.UserDTO) userObj).getId();
-        ApiResponse resp = userService.changeEmail(userId, body.get("email"));
-        if(resp.isSuccess()) session.invalidate();
-        return ResponseEntity.ok(resp);
+    public ResponseEntity<ApiResponse> changeEmail(@RequestBody java.util.Map<String, String> body, @RequestParam Long userId) {
+        return ResponseEntity.ok(userService.changeEmail(userId, body.get("email")));
     }
 
     @PutMapping("/change-password")
-    public ResponseEntity<ApiResponse> changePassword(@RequestBody java.util.Map<String, String> body, HttpSession session) {
-        Object userObj = session.getAttribute("user");
-        if (userObj == null) return ResponseEntity.status(401).body(new ApiResponse(false, "Unauthorized"));
-
-        Long userId = ((com.tennis.dto.UserDTO) userObj).getId();
-        ApiResponse resp = userService.changePassword(userId, body.get("password"));
-        if(resp.isSuccess()) session.invalidate();
-        return ResponseEntity.ok(resp);
+    public ResponseEntity<ApiResponse> changePassword(@RequestBody java.util.Map<String, String> body, @RequestParam Long userId) {
+        return ResponseEntity.ok(userService.changePassword(userId, body.get("password")));
     }
 
     @PutMapping("/update-profile")
-    public ResponseEntity<ApiResponse> updateProfile(@RequestBody UserDTO updates, HttpSession session) {
-        Object userObj = session.getAttribute("user");
-        if (userObj == null) return ResponseEntity.status(401).body(new ApiResponse(false, "Unauthorized"));
-
-        Long userId = ((com.tennis.dto.UserDTO) userObj).getId();
+    public ResponseEntity<ApiResponse> updateProfile(@RequestBody UserDTO updates, @RequestParam Long userId) {
         ApiResponse response;
 
         if (updates.getFirstName() != null) response = userService.changeFirstName(userId, updates.getFirstName());
@@ -92,20 +66,11 @@ public class UserController {
         else if (updates.getPhoneNumber() != null) response = userService.changePhoneNumber(userId, updates.getPhoneNumber());
         else return ResponseEntity.badRequest().body(new ApiResponse(false, "No valid field to update"));
 
-        if (response.isSuccess()) {
-            session.setAttribute("user", userService.getUser(userId).getData());
-        }
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete-account")
-    public ResponseEntity<ApiResponse> deleteAccount(HttpSession session) {
-        Object userObj = session.getAttribute("user");
-        if (userObj == null) return ResponseEntity.status(401).body(new ApiResponse(false, "Unauthorized"));
-
-        Long userId = ((com.tennis.dto.UserDTO) userObj).getId();
-        ApiResponse resp = userService.deleteUser(userId);
-        if(resp.isSuccess()) session.invalidate();
-        return ResponseEntity.ok(resp);
+    public ResponseEntity<ApiResponse> deleteAccount(@RequestParam Long userId) {
+        return ResponseEntity.ok(userService.deleteUser(userId));
     }
 }

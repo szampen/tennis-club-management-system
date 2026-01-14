@@ -1,6 +1,8 @@
 package com.tennis.service;
 
 import com.tennis.database.DatabaseConnection;
+import com.tennis.database.UnitOfWork;
+import com.tennis.database.UnitOfWorkFactory;
 import com.tennis.domain.Match;
 import com.tennis.domain.Player;
 import com.tennis.domain.Tournament;
@@ -25,14 +27,14 @@ public class UserService {
     private final MatchRepository matchRepository;
     private final TournamentRepository tournamentRepository;
 
-    public UserService(UserRepository userRepo, MatchRepository matchRepo, TournamentRepository tournamentRepository){
-        this.userRepository = userRepo;
-        this.matchRepository = matchRepo;
-        this.tournamentRepository = tournamentRepository;
-    }
-
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
+    public UserService(){
+        this.userRepository = new UserRepository();
+        this.matchRepository = new MatchRepository();
+        this.tournamentRepository = new TournamentRepository();
+    }
 
     public ApiResponse login(LoginRequest request){
         Connection conn = null;
@@ -61,9 +63,10 @@ public class UserService {
     }
 
     public ApiResponse register(RegisterRequest request){
-        Connection conn = null;
+        UnitOfWork uow = null;
         try{
-            conn = DatabaseConnection.getConnection();
+            uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
 
             User existing = userRepository.findByEmail(request.getEmail(), conn);
             if(existing != null){
@@ -81,19 +84,19 @@ public class UserService {
             player.setLastName(request.getLastName());
             player.setPhoneNumber(request.getPhoneNumber());
 
-            userRepository.save(player, conn);
+            uow.registerNew(player);
+            uow.commit();
 
             UserDTO userDTO = DTOMapper.toUserDTO(player);
             return new ApiResponse(true, "Registration was successful.", userDTO);
-
         } catch (Exception e) {
+            if (uow != null) uow.rollback();
             return new ApiResponse(false, "Registration error: " + e.getMessage());
         } finally {
-            DatabaseConnection.returnConnection(conn);
+            if (uow != null) uow.finish();
         }
     }
 
-    //TODO: is it needed?
     public ApiResponse getUser(Long id){
         Connection conn = null;
         try {
@@ -155,16 +158,13 @@ public class UserService {
             }
 
             List<Tournament> tournamentsWon = tournamentRepository.tournamentsWonByUser(userId, conn);
-            for(Tournament t : tournamentsWon){
-
-            }
 
             List<Match> matches = matchRepository.findByPlayer(userId,conn);
-            List<MatchListDTO> matchDtos = new ArrayList<>();
+            List<MatchListDTO> matchDto = new ArrayList<>();
             for(Match m : matches){
                 Tournament temp = tournamentRepository.findById(m.getTournamentId(),conn);
                 String opponentName;
-                if(m.getPlayer1Id() == userId){
+                if(m.getPlayer1Id().equals(userId)){
                     User opponent = userRepository.findById(m.getPlayer2Id(),conn);
                     opponentName = opponent.getFirstName() + " " + opponent.getLastName();
                 }
@@ -172,10 +172,10 @@ public class UserService {
                     User opponent = userRepository.findById(m.getPlayer1Id(),conn);
                     opponentName = opponent.getFirstName() + " " + opponent.getLastName();
                 }
-                matchDtos.add(DTOMapper.toMatchListDTO(userId,m,temp, opponentName));
+                matchDto.add(DTOMapper.toMatchListDTO(userId,m,temp, opponentName));
             }
 
-            PlayerStatsDTO statsDTO = DTOMapper.toPlayerStatsDTO(wins,losses,setWin,setLoss,match_percentage,set_percentage,tournamentsWon,matchDtos);
+            PlayerStatsDTO statsDTO = DTOMapper.toPlayerStatsDTO(wins,losses,setWin,setLoss,match_percentage,set_percentage,tournamentsWon,matchDto);
 
             return new ApiResponse(true, "OK", statsDTO);
         } catch (Exception e){
@@ -186,9 +186,10 @@ public class UserService {
     }
 
     public ApiResponse changeEmail(Long userId, String email){
-        Connection conn = null;
+        UnitOfWork uow = null;
         try{
-            conn = DatabaseConnection.getConnection();
+            uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
 
             if(!EMAIL_PATTERN.matcher(email).matches()){
                 return new ApiResponse(false, "Invalid email format. Use: xxx@domain.xx");
@@ -198,32 +199,39 @@ public class UserService {
             if(user == null) return new ApiResponse(false, "User not found.");
 
             user.setEmail(email);
-            userRepository.save(user,conn);
+
+            uow.registerDirty(user);
+            uow.commit();
 
             return new ApiResponse(true, "Email changed");
         } catch (Exception e){
+            if(uow != null) uow.rollback();
             return new ApiResponse(false, "Error: " + e.getMessage());
         } finally {
-            DatabaseConnection.returnConnection(conn);
+            if(uow != null) uow.finish();
         }
     }
 
     public ApiResponse changePassword(Long userId, String password){
-        Connection conn = null;
+        UnitOfWork uow = null;
         try{
-            conn = DatabaseConnection.getConnection();
+            uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
 
             User user = userRepository.findById(userId, conn);
             if(user == null) return new ApiResponse(false, "User not found.");
 
             user.setPassword(BCrypt.hashpw(password,BCrypt.gensalt()));
-            userRepository.save(user,conn);
+
+            uow.registerDirty(user);
+            uow.commit();
 
             return new ApiResponse(true, "Password changed");
         } catch (Exception e){
+            if(uow != null) uow.rollback();
             return new ApiResponse(false, "Error: " + e.getMessage());
         } finally {
-            DatabaseConnection.returnConnection(conn);
+            if(uow != null) uow.finish();
         }
     }
 
@@ -285,22 +293,24 @@ public class UserService {
     }
 
     public ApiResponse deleteUser(Long userId){
-        Connection conn = null;
+        UnitOfWork uow = null;
         try{
-            conn = DatabaseConnection.getConnection();
+            uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
 
             User user = userRepository.findById(userId, conn);
             if(user == null) return new ApiResponse(false, "User not found.");
 
-            userRepository.delete(user,conn);
+            uow.registerDeleted(user);
+            uow.commit();
 
             return new ApiResponse(true, "User deleted.");
         } catch (Exception e){
+            if(uow != null) uow.rollback();
             return new ApiResponse(false, "Error: " + e.getMessage());
         } finally {
-            DatabaseConnection.returnConnection(conn);
+            if(uow != null) uow.finish();
         }
     }
 
-    //TODO: public ApiResponse delete() - soft-delete
 }

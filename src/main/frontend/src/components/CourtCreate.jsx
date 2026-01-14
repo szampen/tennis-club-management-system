@@ -22,8 +22,13 @@ const CourtCreate = ({ user }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const payload = {
+            ...form,
+            courtNumber: parseInt(form.courtNumber, 10),
+            pricePerHour: parseFloat(form.pricePerHour),
+        };
         try {
-            const res = await axios.post('/api/courts', form);
+            const res = await axios.post(`/api/courts?userId=${user.id}`, payload);
 
             if (res.data.success) {
                 setInfo({ message: "Court created successfully! Redirecting...", isSuccess: true });
@@ -34,7 +39,7 @@ const CourtCreate = ({ user }) => {
                 setInfo({ message: res.data.message, isSuccess: false });
             }
         } catch (err) {
-            setInfo({ message: "Error creating court. Check if number is unique.", isSuccess: false });
+            setInfo({ message: "Error creating court.", isSuccess: false });
         }
     };
 

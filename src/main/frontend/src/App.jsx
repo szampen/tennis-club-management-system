@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Navigate, Route, BrowserRouter, Routes} from "react-router-dom";
+import {Navigate, Route, HashRouter, Routes} from "react-router-dom";
 import axios from 'axios';
 import Navbar from "./components/Navbar";
 import LoginForm from "./components/LoginForm";
@@ -11,6 +11,12 @@ import PlayersList from "./components/PlayersList.jsx";
 import CourtList from "./components/CourtList.jsx";
 import CourtEdit from "./components/CourtEdit.jsx";
 import CourtCreate from "./components/CourtCreate.jsx";
+import CreateReservation from "./components/CreateReservation.jsx";
+import TournamentList from "./components/TournamentList.jsx";
+import TournamentSetupMatches from "./components/TournamentSetupMatches.jsx";
+import TournamentDetails from "./components/TournamentDetails.jsx";
+import MatchDetails from "./components/MatchDetails.jsx";
+axios.defaults.baseURL = 'http://localhost:9000';
 axios.defaults.withCredentials = true;
 
 function App(){
@@ -18,16 +24,22 @@ function App(){
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get('/api/users/me')
-            .then(res => setUser(res.data.data))
-            .catch(() => setUser(null))
-            .finally(() => setLoading(false))
+        const savedUser = sessionStorage.getItem('loggedUser');
+        if (savedUser) {
+            try {
+                setUser(JSON.parse(savedUser));
+            } catch (e) {
+                console.error("Error parsing user.", e);
+                sessionStorage.removeItem('loggedUser');
+            }
+        }
+        setLoading(false); // Finish loading, not regarding the result
     }, []);
 
     if(loading) return <div>Loading the system...</div>
 
     return (
-        <BrowserRouter>
+        <HashRouter>
             <Navbar user={user} setUser={setUser} />
             <div style = {{padding: '20px'}}>
                 <Routes>
@@ -35,11 +47,17 @@ function App(){
                     <Route path="/register" element={!user ? <RegisterForm /> : <Navigate to="/" />} />
                     <Route path="/settings" element={<Settings user = {user} setUser={setUser}/>} />
                     <Route path="/user/:id" element={<UserProfile currentUser={user} />} />
-                    <Route path="/reservation/:id" element={user ? <ReservationDetails /> : <Navigate to="/login" />} />
+                    <Route path="/reservations/:id" element={user ? <ReservationDetails /> : <Navigate to="/login" />} />
                     <Route path="/players" element={<PlayersList />} />
                     <Route path="/courts/filtered" element={<CourtList user = {user}/>} />
                     <Route path="/courts/new" element={<CourtCreate user={user} />} />
                     <Route path="/courts/edit/:id" element={<CourtEdit user={user} />} />
+                    <Route path="/reserve/:courtId" element={user ? <CreateReservation user={user} /> : <Navigate to="/login" />}/>
+                    <Route path="/reserve" element={user ? <CreateReservation user={user} /> : <Navigate to="/login" />}/>
+                    <Route path="/tournaments" element={<TournamentList user={user} />} />
+                    <Route path="/tournaments/setup/:id" element={<TournamentSetupMatches />} />
+                    <Route path="/tournaments/:id" element={<TournamentDetails user={user} />} />
+                    <Route path="/match/:matchId" element={<MatchDetails user={user} />} />
                     <Route path="/" element={
                         user ? (
                             <div style={{textAlign: 'center', marginTop: '50px'}}>
@@ -49,13 +67,13 @@ function App(){
                         ) : (
                             <div style={{textAlign: 'center', marginTop: '50px'}}>
                                 <h2>Welcome to the Tennis Club</h2>
-                                <p>Join us and feel the spirit of the grass courts.</p>
+                                <p>Join us and feel the spirit of the courts.</p>
                             </div>
                         )
                     }/>
                 </Routes>
             </div>
-        </BrowserRouter>
+        </HashRouter>
     )
 }
 

@@ -9,8 +9,11 @@ const UserProfile = ({ currentUser }) => {
     const [stats, setStats] = useState(null);
     const [reservations, setReservations] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [info, setInfo] = useState({ message: '', isSuccess: false });
 
     const isOwnProfile = currentUser && currentUser.id === parseInt(id);
+    const isAdmin = currentUser && currentUser.userType === 'ADMIN';
+    const canSeePrivateData = isOwnProfile || isAdmin;
 
     useEffect(() => {
         setLoading(true);
@@ -19,18 +22,18 @@ const UserProfile = ({ currentUser }) => {
                 const statsRes = await axios.get(`/api/users/${id}/stats`);
                 setStats(statsRes.data.data);
 
-                if (isOwnProfile) {
+                if (canSeePrivateData) {
                     const resRes = await axios.get(`/api/reservations/user/${id}`);
                     setReservations(resRes.data.data);
                 }
             } catch (err) {
-                console.error("Error loading profile:", err);
+                setInfo({message: "Error loading profile", isSuccess: false})
             } finally {
                 setLoading(false);
             }
         };
         fetchData();
-    }, [id, isOwnProfile]);
+    }, [id, canSeePrivateData]);
 
     if (loading) return <div className="loading">Loading profile...</div>;
     if (!stats) return <div className="error">Profile not found.</div>;
@@ -44,6 +47,12 @@ const UserProfile = ({ currentUser }) => {
                     <button className="btn-edit-top" onClick={() => navigate('/settings')}>
                          Edit My Profile
                     </button>
+                </div>
+            )}
+
+            {info.message && (
+                <div className={info.isSuccess ? "alert-success" : "alert-error"}>
+                    {info.message}
                 </div>
             )}
 
@@ -85,7 +94,13 @@ const UserProfile = ({ currentUser }) => {
                         <div className="tourney-badges">
                             {stats.tournamentsWon && Object.keys(stats.tournamentsWon).length > 0 ? (
                                 Object.entries(stats.tournamentsWon).map(([id, name]) => (
-                                    <span key={id} className="badge">{name}</span>
+                                    <span
+                                        key={id}
+                                        className="badge cursor-pointer"
+                                        onClick={() => navigate(`/tournaments/${id}`)}
+                                    >
+                                    {name}
+                                    </span>
                                 ))
                             ) : (
                                 <small>No titles yet</small>
@@ -96,7 +111,11 @@ const UserProfile = ({ currentUser }) => {
                     <h4>Recent Match History</h4>
                     <div className="vertical-scroll-list">
                         {stats.matches.map(match => (
-                            <div key={match.id} className={`match-card-mini ${match.winOrLoss.toLowerCase()}`}>
+                            <div
+                                key={match.id}
+                                className={`match-card-mini ${match.winOrLoss.toLowerCase()} cursor-pointer`}
+                                onClick={() => navigate(`/match/${match.id}`)}
+                            >
                                 <div className="match-info">
                                     <strong>{match.winOrLoss}</strong>
                                     <span>vs {match.opponentName}</span>
@@ -115,12 +134,12 @@ const UserProfile = ({ currentUser }) => {
                         <h3> {isOwnProfile ? "My Reservations" : "Member Activity"}</h3>
                     </div>
 
-                    {isOwnProfile ? (
+                    {canSeePrivateData ? (
                         <div className="vertical-scroll-list">
                             {reservations.length > 0 ? reservations.map(res => (
                                 <div key={res.reservationId}
                                      className="reservation-card-mini"
-                                     onClick={() => navigate(`/reservation/${res.reservationId}`)}>
+                                     onClick={() => navigate(`/reservations/${res.reservationId}`)}>
                                     <div className="res-date">
                                         <strong>{res.startTime.split('T')[0]}</strong>
                                         <span>{res.startTime.split('T')[1].substring(0,5)}</span>

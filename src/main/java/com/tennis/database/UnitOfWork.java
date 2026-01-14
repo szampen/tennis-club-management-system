@@ -13,14 +13,14 @@ import java.util.Set;
     Guarantees atomicity - everything goes through or nothing
  */
 public class UnitOfWork {
-    private Connection connection; // database connection
+    private final Connection connection; // database connection
 
     // sets of states - INSERT/UPDATE/DELETE
-    private Set<Object> newObjects = new HashSet<>();
-    private Set<Object> dirtyObjects = new HashSet<>();
-    private Set<Object> deletedObjects = new HashSet<>();
+    private final Set<Object> newObjects = new HashSet<>();
+    private final Set<Object> dirtyObjects = new HashSet<>();
+    private final Set<Object> deletedObjects = new HashSet<>();
 
-    private Map<Class<?>, DataMapper<?>> mappers = new HashMap<>();
+    private final Map<Class<?>, DataMapper<?>> mappers = new HashMap<>();
 
     public UnitOfWork() throws Exception{
         this.connection = DatabaseConnection.getConnection();
@@ -31,7 +31,7 @@ public class UnitOfWork {
         return connection;
     }
 
-    public <T> void registerMapper(Class<T> class_, DataMapper<T> mapper){
+    public <T> void registerMapper(Class<T> class_, DataMapper<? super T> mapper){
         mappers.put(class_,mapper);
     }
 

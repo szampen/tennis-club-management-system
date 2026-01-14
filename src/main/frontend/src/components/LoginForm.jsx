@@ -13,6 +13,7 @@ const LoginForm = ({onLoginSuccess}) => {
         try {
             const res = await axios.post('/api/users/login', {email,password});
             if (res.data.success){
+                sessionStorage.setItem('loggedUser', JSON.stringify(res.data.data));
                 onLoginSuccess(res.data.data);
                 navigate('/');
             } else {

@@ -12,6 +12,8 @@ public class ReservationDetailsDTO {
     private String courtLocation;
     private boolean courtHasRoof;
 
+    private Long userId;
+
     private PaymentDTO payment;
 
     public ReservationDetailsDTO() {}
@@ -94,5 +96,13 @@ public class ReservationDetailsDTO {
 
     public void setPayment(PaymentDTO payment) {
         this.payment = payment;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

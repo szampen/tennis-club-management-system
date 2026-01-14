@@ -26,7 +26,7 @@ const PlayersList = () => {
             });
     }, []);
 
-    // Filtrowanie graczy po imieniu lub nazwisku
+    // Filtering players by name or lastname
     const filteredPlayers = players.filter(p =>
         (p.firstName + " " + p.lastName).toLowerCase().includes(searchTerm.toLowerCase())
     );

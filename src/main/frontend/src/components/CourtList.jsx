@@ -34,9 +34,10 @@ const CourtList = ({ user }) => {
                 payload.availableForReservations = filters.availableForReservations;
             }
 
-            const res = await axios.post('/api/courts/filtered', payload);
+            const res = await axios.post(`/api/courts/filtered?t=${new Date().getTime()}`, payload);
             if (res.data && res.data.success) {
                 setCourts(res.data.data);
+                setInfo({message: res.data.message, isSuccess: true})
             }
         } catch (err) {
             setInfo({ message: "Error loading courts", isSuccess: false });
@@ -51,10 +52,10 @@ const CourtList = ({ user }) => {
 
     const handleDelete = async (courtId) => {
         try {
-            const res = await axios.delete(`/api/courts/${courtId}`);
+            const res = await axios.delete(`/api/courts/${courtId}?userId=${user.id}`);
             if (res.data.success) {
                 setDeletingId(null);
-                fetchCourts();
+                await fetchCourts();
             } else {
                 setInfo({ message: res.data.message, isSuccess: false });
             }
@@ -65,12 +66,6 @@ const CourtList = ({ user }) => {
 
     return (
         <div className="court-page-container">
-
-            {info.message && (
-                <div className={info.isSuccess ? "alert-success" : "alert-error"}>
-                    {info.message}
-                </div>
-            )}
 
             <aside className="court-sidebar">
                 {isAdmin && (
@@ -145,6 +140,13 @@ const CourtList = ({ user }) => {
             </aside>
 
             <main className="court-main-content">
+
+                {info.message && (
+                    <div className={info.isSuccess ? "alert-success" : "alert-error"}>
+                        {info.message}
+                    </div>
+                )}
+
                 {loading && courts.length === 0 ? (
                     <div className="loader">Searching for available courts...</div>
                 ) : (

@@ -7,6 +7,7 @@ public class TournamentDetailsDTO {
     private String name;
     private String status;
     private double entryFee;
+    private String tournamentRank;
     private int maxParticipants;
     private int currentParticipants;
     private PlayerDTO winner;
@@ -95,5 +96,13 @@ public class TournamentDetailsDTO {
 
     public void setWinner(PlayerDTO winner) {
         this.winner = winner;
+    }
+
+    public String getTournamentRank() {
+        return tournamentRank;
+    }
+
+    public void setTournamentRank(String tournamentRank) {
+        this.tournamentRank = tournamentRank;
     }
 }

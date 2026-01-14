@@ -10,16 +10,19 @@ const ReservationDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isConfirming, setIsConfirming] = useState(false);
+    const [info, setInfo] = useState({ message: '', isSuccess: false });
+    const savedUser = JSON.parse(sessionStorage.getItem('loggedUser'));
+    const isAdmin = savedUser && savedUser.userType === 'ADMIN';
+    const isOwner = details && savedUser && details.userId === savedUser.id;
 
     const fetchDetails = () => {
         setLoading(true);
-        axios.get(`/api/reservations/${id}`)
+        axios.get(`/api/reservations/${id}?userId=${savedUser.id}`)
             .then(res => {
                 setDetails(res.data.data);
                 setLoading(false);
             })
             .catch(err => {
-                console.error("Error fetching reservation details", err);
                 setError("Reservation not found.");
                 setLoading(false);
             });
@@ -31,16 +34,16 @@ const ReservationDetails = () => {
 
     const handleCancel = async () => {
         try {
-            const response = await axios.post(`/api/reservations/${id}/cancel`);
+            const response = await axios.post(`/api/reservations/${id}/cancel?userId=${savedUser.id}`);
             if (response.data.success) {
                 setIsConfirming(false);
                 fetchDetails();
             } else {
-                console.error(response.data.message);
+                setInfo({message: response.data.message, isSuccess: false})
                 setIsConfirming(false);
             }
         } catch (err) {
-            console.error("Cancel error", err);
+            setInfo({message: "Cancel error", isSuccess: false})
             setIsConfirming(false);
         }
     };
@@ -50,10 +53,17 @@ const ReservationDetails = () => {
 
     return (
         <div className="reservation-container">
-            <div className="top-actions">
-                <button className="btn-back" onClick={() => navigate(-1)}>← Back to Profile</button>
 
-                {details.status === "ACTIVE"&& (
+            {info.message && (
+                <div className={info.isSuccess ? "alert-success" : "alert-error"}>
+                    {info.message}
+                </div>
+            )}
+
+            <div className="top-actions">
+                <button className="btn-back" onClick={() => navigate(`/user/${details.userId}`)}>← Back to Profile</button>
+
+                {details.status === "ACTIVE"&& (isOwner||isAdmin) && (
                     <div className="cancel-container">
                         {!isConfirming ? (
                             // First stage: main button

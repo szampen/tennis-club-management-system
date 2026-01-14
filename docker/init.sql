@@ -93,3 +93,6 @@ CREATE TABLE IF NOT EXISTS matches (
     FOREIGN KEY (next_match_id) REFERENCES matches(id),
     FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE SET NULL
     ) CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO users (email, password, first_name, last_name, phone_number, user_type, ranking_points)
+VALUES ('admin@admin.com', '$2a$10$x5MdQOUwNifz5eeeQlU3yel00vHmUT9zYPibZN9p12uE7gjQZkxwG', 'Admin', 'Admin', '000000000', 'ADMIN', 0)

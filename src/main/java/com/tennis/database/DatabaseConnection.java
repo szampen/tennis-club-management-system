@@ -16,7 +16,7 @@ public class DatabaseConnection {
         url = config.getProperty("db.url");
         username = config.getProperty("db.username");
         password = config.getProperty("db.password");
-        int poolSize = Integer.parseInt(config.getProperty("db.poolsize", "10"));
+        int poolSize = Integer.parseInt(config.getProperty("db.pool.size", "10"));
 
         pool = new ArrayBlockingQueue<>(poolSize);
 
@@ -40,8 +40,18 @@ public class DatabaseConnection {
 
     public static void returnConnection(Connection conn){
         try{
-            if(conn != null && !conn.isClosed()){
-                pool.put(conn); // return connection to the queue instead of closing it, waits for space if queue is full
+            if (conn != null && !conn.isClosed()) {
+                // secures from uncommited changes
+                if (!conn.getAutoCommit()) {
+                    conn.rollback();
+                    conn.setAutoCommit(true);
+                }
+                // return connection to queue
+                boolean returned = pool.offer(conn);
+                if (!returned) {
+                    // if pool somehow full, close connection manually
+                    conn.close();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

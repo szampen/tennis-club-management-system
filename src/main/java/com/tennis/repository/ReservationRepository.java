@@ -5,12 +5,17 @@ import com.tennis.mapper.ReservationMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public class ReservationRepository {
-    private final ReservationMapper mapper = new ReservationMapper();
+    private final ReservationMapper mapper;
+
+    public ReservationRepository(){
+        mapper = new ReservationMapper();
+    }
 
     public Reservation findById(Long id, Connection connection) {
         try {
@@ -79,6 +84,14 @@ public class ReservationRepository {
             }
         } catch (Exception e){
             throw new RuntimeException("Error deleting reservation.", e);
+        }
+    }
+
+    public LocalDate[] getTournamentDateRange(Long tournamentId, Connection conn) {
+        try{
+            return mapper.getTournamentDateRange(tournamentId,conn);
+        } catch (Exception e){
+            throw new RuntimeException("Error fetching tournament date range.", e);
         }
     }
 }

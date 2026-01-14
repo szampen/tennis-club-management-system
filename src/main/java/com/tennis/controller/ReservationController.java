@@ -1,8 +1,8 @@
 package com.tennis.controller;
 
 import com.tennis.dto.ApiResponse;
+import com.tennis.dto.CreateReservationRequest;
 import com.tennis.service.ReservationService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,18 +21,17 @@ public class ReservationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getDetails(@PathVariable Long id) {
-        return ResponseEntity.ok(reservationService.getReservation(id));
+    public ResponseEntity<ApiResponse> getDetails(@PathVariable Long id, @RequestParam Long userId) {
+        return ResponseEntity.ok(reservationService.getReservation(id,userId));
     }
 
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse> cancelReservation(@PathVariable Long id, HttpSession session) {
-        Object userObj = session.getAttribute("user");
-        if (userObj == null) {
-            return ResponseEntity.status(401).body(new ApiResponse(false, "You must be logged in."));
-        }
-        Long userId = ((com.tennis.dto.UserDTO) userObj).getId();
-
+    public ResponseEntity<ApiResponse> cancelReservation(@PathVariable Long id, @RequestParam Long userId) {
         return ResponseEntity.ok(reservationService.cancelReservation(id, userId));
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponse> createReservation(@RequestBody CreateReservationRequest request) {
+        return ResponseEntity.ok(reservationService.createReservation(request));
     }
 }

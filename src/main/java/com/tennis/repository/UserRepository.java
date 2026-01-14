@@ -10,7 +10,11 @@ import java.util.List;
 
 @Repository
 public class UserRepository {
-    private final UserMapper mapper = new UserMapper();
+    private final UserMapper mapper;
+
+    public UserRepository(){
+        this.mapper = new UserMapper();
+    }
 
     public User findById(Long id, Connection connection){
         try{
@@ -22,7 +26,7 @@ public class UserRepository {
 
     public User findByEmail(String email, Connection connection){
         try{
-            return mapper.findUserbyEmail(email,connection);
+            return mapper.findUserByEmail(email,connection);
         } catch (Exception e){
             throw new RuntimeException("Error fetching user", e);
         }

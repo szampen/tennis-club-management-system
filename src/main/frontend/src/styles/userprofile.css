@@ -38,17 +38,18 @@
 .vertical-card {
     display: flex;
     flex-direction: column;
-    min-height: 600px; /* Fixed height of cards*/
+    height: 650px;
     background: white;
     border-radius: 20px;
     padding: 20px;
     border-top: 6px solid var(--wimbledon-purple);
+    box-sizing: border-box;
 }
 
 .card-header h3 {
     margin-top: 0;
     margin-bottom: 0 !important;
-    padding-bottom: 5px; /
+    padding-bottom: 5px;
     color: var(--wimbledon-purple);
     border-bottom: 2px solid var(--wimbledon-cream);
 }
@@ -126,7 +127,6 @@
     flex-direction: column;
     gap: 12px;
     padding-right: 10px;
-    max-height: 350px;
 }
 
 /* style of match and reservation cards */
@@ -184,3 +184,14 @@
 /* Scrollbar Style */
 .vertical-scroll-list::-webkit-scrollbar { width: 6px; }
 .vertical-scroll-list::-webkit-scrollbar-thumb { background: var(--wimbledon-gray); border-radius: 10px; }
+
+.badge.cursor-pointer:hover {
+    background-color: #ffd700; /* np. złoty kolor dla zwycięstw */
+    transform: scale(1.05);
+    transition: all 0.2s;
+}
+
+.match-card-mini.cursor-pointer:hover {
+    background-color: #f0f0f0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}

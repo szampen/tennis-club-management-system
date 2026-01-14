@@ -11,7 +11,7 @@ const Settings = ({ user, setUser }) => {
     const handleUpdate = async (field, value, endpoint = '/api/users/update-profile') => {
         try {
             const payload = { [field]: value };
-            const res = await axios.put(endpoint, payload);
+            const res = await axios.put(`${endpoint}?userId=${user.id}`, payload);
 
             if (res.data.success) {
                 if (field === 'email' || field === 'password') {
@@ -22,8 +22,13 @@ const Settings = ({ user, setUser }) => {
                     }, 2000);
                 } else {
                     // Refresh local user data from session
-                    const me = await axios.get('/api/users/me');
-                    setUser(me.data.data);
+                    const me = await axios.get(`/api/users/me?userId=${user.id}`);
+                    if (me.data.success) {
+                        const updatedUser = me.data.data;
+                        setUser(updatedUser);
+                        sessionStorage.setItem('loggedUser', JSON.stringify(updatedUser));
+                        setInfo({ message: "Profile updated!", isSuccess: true });
+                    }
                 }
             } else {
                 setInfo({ message: res.data.message, isSuccess: false });
@@ -34,9 +39,15 @@ const Settings = ({ user, setUser }) => {
     };
 
     const handleDelete = async () => {
-        if (await axios.delete('/api/users/delete-account')) {
-            setUser(null);
-            navigate('/');
+        try {
+            const res = await axios.delete(`/api/users/delete-account?userId=${user.id}`);
+            if (res.data.success) {
+                sessionStorage.removeItem('loggedUser');
+                setUser(null);
+                navigate('/');
+            }
+        } catch (err) {
+            setInfo({ message: "Could not delete account.", isSuccess: false });
         }
     };
 

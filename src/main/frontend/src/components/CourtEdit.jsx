@@ -27,12 +27,17 @@ const CourtEdit = ({ user }) => {
 
     const handleUpdate = async (field, value) => {
         try {
+            let finalValue = value;
+
+            if (field === 'courtNumber') finalValue = parseInt(value, 10);
+            if (field === 'pricePerHour') finalValue = parseFloat(value);
+
             const payload = {
                 id: id,
-                [field]: value
+                [field]: finalValue
             };
 
-            const res = await axios.put(`/api/courts/${id}/update`, payload);
+            const res = await axios.put(`/api/courts/${id}/update?userId=${user.id}`, payload);
 
             if (res.data.success) {
                 setInfo({ message: "Court updated successfully!", isSuccess: true });

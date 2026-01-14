@@ -8,6 +8,7 @@ function Navbar({user,setUser}){
     const logout = async () => {
         try{
             await axios.post('/api/users/logout');
+            sessionStorage.removeItem('loggedUser');
             setUser(null);
             navigate('/');
         } catch (e){
@@ -22,8 +23,9 @@ function Navbar({user,setUser}){
             </div>
 
             <div className="navbar-section center">
-                <Link to="/players" className="nav-link-main">Find Players</Link>
-                <Link to="/courts/filtered" className="nav-link-main">Find Courts</Link>
+                <Link to="/players" className="nav-link-main">Players</Link>
+                <Link to="/courts/filtered" className="nav-link-main">Courts</Link>
+                <Link to="/tournaments" className="nav-link-main">Tournaments</Link>
             </div>
 
             <div className="navbar-section right">
