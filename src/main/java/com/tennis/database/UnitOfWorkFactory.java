@@ -8,6 +8,7 @@ public class UnitOfWorkFactory {
         UnitOfWork uow = new UnitOfWork();
 
         uow.registerMapper(User.class, new UserMapper());
+        uow.registerMapper(Player.class, new UserMapper());
         uow.registerMapper(Court.class, new CourtMapper());
         uow.registerMapper(Reservation.class, new ReservationMapper());
         uow.registerMapper(Payment.class, new PaymentMapper());

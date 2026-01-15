@@ -27,13 +27,6 @@ public class Reservation {
         }
     }
 
-    //TODO: check
-    public void complete(){
-        if (LocalDateTime.now().isAfter(this.endTime)){
-            this.status = ReservationStatus.COMPLETED;
-        }
-    }
-
     public Double calculatePrice(Double price){
         long hours = java.time.Duration.between(startTime,endTime).toHours();
         return hours * price;
@@ -86,7 +79,6 @@ public class Reservation {
         this.status = status;
     }
 
-    //TODO: check
     public Payment getPayment(){
         return payment;
     }

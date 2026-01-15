@@ -8,19 +8,26 @@ import java.sql.*;
 public class PaymentMapper implements DataMapper<Payment>{
     @Override
     public Long insert(Payment payment, Connection connection) throws SQLException {
-        String sql = "INSERT INTO payments (amount, status, payment_date, transaction_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO payments (reservation_id,amount, status, payment_date, transaction_id) VALUES (?,?, ?, ?, ?)";
 
         PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        statement.setDouble(1, payment.getAmount());
-        statement.setString(2, payment.getPaymentStatus().name());
 
-        if(payment.getPaymentDate() != null){
-            statement.setTimestamp(3, Timestamp.valueOf(payment.getPaymentDate()));
-        } else{
-            statement.setNull(3, Types.TIMESTAMP);
+        if (payment.getReservationId() != null) {
+            statement.setLong(1, payment.getReservationId());
+        } else {
+            statement.setNull(1, Types.BIGINT);
         }
 
-        statement.setString(4, payment.getTransactionId());
+        statement.setDouble(2, payment.getAmount());
+        statement.setString(3, payment.getPaymentStatus().name());
+
+        if(payment.getPaymentDate() != null){
+            statement.setTimestamp(4, Timestamp.valueOf(payment.getPaymentDate()));
+        } else{
+            statement.setNull(4, Types.TIMESTAMP);
+        }
+
+        statement.setString(5, payment.getTransactionId());
 
         statement.executeUpdate();
 

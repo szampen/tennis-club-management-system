@@ -14,8 +14,8 @@ public class MatchDetailsDTO {
     private String player2FullName;
     private Long winnerId;
 
-    private String finalScore; // np. "2:1"
-    private List<String> sets; // np. ["6:4", "3:6", "7:5"]
+    private String finalScore; // ex. "2:1"
+    private List<String> sets; // ex. ["6:4", "3:6", "7:5"]
 
     private String courtName;
     private int courtNumber;

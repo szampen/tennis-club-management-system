@@ -9,11 +9,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-    Maps domain model User into database
- */
 
-//TODO: findUserbyId and Email - REMEMBER TO CHECK IF IDENTITYMAP NECESSARY
 public class UserMapper implements DataMapper<User>{
 
     @Override
@@ -71,10 +67,21 @@ public class UserMapper implements DataMapper<User>{
     }
 
     @Override
-    public void delete(User user, Connection connection) throws SQLException{
-        String sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?";
+    public void delete(User user, Connection connection) throws SQLException {
+        String suffix = "_" + System.currentTimeMillis() + "_deleted";
+
+        String sql = "UPDATE users SET " +
+                "deleted_at = NOW(), " +
+                "email = CONCAT(email, ?), " + // Changes maciek@test.pl into maciek@test.pl_123456_deleted
+                "phone_number = NULL, " +
+                "password = 'DELETED', " +
+                "first_name = 'Deleted', " +
+                "last_name = 'User' " +
+                "WHERE id = ?";
+
         PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setLong(1,user.getId());
+        statement.setString(1, suffix);
+        statement.setLong(2, user.getId());
         statement.executeUpdate();
     }
 
@@ -106,7 +113,7 @@ public class UserMapper implements DataMapper<User>{
 
     public List<User> findAllUsers(Connection connection) throws SQLException{
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users WHERE deleted_at IS NULL";
+        String sql = "SELECT * FROM users WHERE deleted_at IS NULL AND user_type != 'ADMIN' ORDER BY ranking_points DESC";
         Statement statement = connection.createStatement();
         ResultSet rs = statement.executeQuery(sql);
 
@@ -133,28 +140,19 @@ public class UserMapper implements DataMapper<User>{
 
 
     public User findUserById(Long id, Connection connection) throws SQLException{
-        /*
-        if(identityMap.contains(User.class,id)){
-            return identityMap.get(User.class,id);
-        }
-
-        */
-
-        String sql = "SELECT * FROM users WHERE id = ? AND deleted_at IS NULL";
+        String sql = "SELECT * FROM users WHERE id = ?";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1,id);
 
         ResultSet rs = statement.executeQuery();
 
         if(rs.next()){
-            User user = mapResultSetToUser(rs);
-            //identityMap.put(User.class,id,user);
-            return user;
+            return mapResultSetToUser(rs);
         }
         return null;
     }
 
-    public User findUserbyEmail(String email, Connection connection) throws SQLException{
+    public User findUserByEmail(String email, Connection connection) throws SQLException{
         String sql = "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setString(1, email);
@@ -162,16 +160,8 @@ public class UserMapper implements DataMapper<User>{
         ResultSet set = statement.executeQuery();
 
         if(set.next()){
-            /*
-            Long id = set.getLong("id");
-            if(identityMap.contains(User.class,id)){
-                return identityMap.get(User.class,id);
-            }
-            */
-            //identityMap.put(User.class, id, user);
             return mapResultSetToUser(set);
         }
         return null;
     }
-    //TODO: find by email/name etc. if needed
 }

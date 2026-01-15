@@ -4,6 +4,7 @@ import com.tennis.domain.Reservation;
 import com.tennis.domain.ReservationStatus;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,11 @@ public class ReservationMapper implements DataMapper<Reservation>{
         stmt.setTimestamp(3, Timestamp.valueOf(reservation.getStartTime()));
         stmt.setTimestamp(4, Timestamp.valueOf(reservation.getEndTime()));
         stmt.setString(5, reservation.getStatus().name());
-        stmt.setTimestamp(6,Timestamp.valueOf(reservation.getExpiresAt()));
+        if (reservation.getExpiresAt() != null) {
+            stmt.setTimestamp(6, Timestamp.valueOf(reservation.getExpiresAt()));
+        } else {
+            stmt.setNull(6, Types.TIMESTAMP);
+        }
 
         stmt.executeUpdate();
 
@@ -37,7 +42,13 @@ public class ReservationMapper implements DataMapper<Reservation>{
     }
 
     @Override
-    public void update(Reservation reservation, Connection connection){}
+    public void update(Reservation reservation, Connection connection) throws SQLException{
+        String sql = "UPDATE reservations SET status = ? WHERE id = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setString(1, reservation.getStatus().name());
+        stmt.setLong(2, reservation.getId());
+        stmt.executeUpdate();
+    }
 
     @Override
     public void delete(Reservation reservation, Connection connection) throws SQLException{
@@ -58,7 +69,10 @@ public class ReservationMapper implements DataMapper<Reservation>{
         reservation.setStartTime(rs.getTimestamp("start_time").toLocalDateTime());
         reservation.setEndTime(rs.getTimestamp("end_time").toLocalDateTime());
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("status")));
-        reservation.setExpiresAt(rs.getTimestamp("expires_at").toLocalDateTime());
+
+        Timestamp ts = rs.getTimestamp("expires_at");
+        if(ts != null) reservation.setExpiresAt(ts.toLocalDateTime());
+
         return reservation;
     }
 
@@ -146,5 +160,29 @@ public class ReservationMapper implements DataMapper<Reservation>{
         statement.setLong(1, matchId);
         statement.executeUpdate();
 
+    }
+
+    public LocalDate[] getTournamentDateRange(Long tournamentId, Connection conn) throws SQLException {
+        String sql = "SELECT MIN(r.start_time), MAX(r.end_time) " +
+                "FROM reservations r " +
+                "JOIN matches m ON r.court_id = m.court_id AND r.start_time = m.scheduled_time " +
+                "WHERE m.tournament_id = ?";
+
+        PreparedStatement statement = conn.prepareStatement(sql);
+        statement.setLong(1, tournamentId);
+
+        ResultSet rs = statement.executeQuery();
+        if (rs.next()) {
+            Timestamp startTs = rs.getTimestamp(1);
+            Timestamp endTs = rs.getTimestamp(2);
+            if (startTs != null && endTs != null) {
+                return new LocalDate[]{
+                        startTs.toLocalDateTime().toLocalDate(),
+                        endTs.toLocalDateTime().toLocalDate()
+                };
+            }
+        }
+
+        return null;
     }
 }

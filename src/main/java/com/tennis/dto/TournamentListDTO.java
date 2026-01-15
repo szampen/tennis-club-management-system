@@ -1,6 +1,7 @@
 package com.tennis.dto;
 
 public class TournamentListDTO {
+    private Long id;
     private String tournamentName;
     private String startDate;
     private String endDate;
@@ -45,5 +46,13 @@ public class TournamentListDTO {
 
     public void setTournamentRank(String tournamentRank) {
         this.tournamentRank = tournamentRank;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

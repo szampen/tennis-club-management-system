@@ -11,7 +11,11 @@ import java.util.List;
 
 @Repository
 public class TournamentRepository {
-    private final TournamentMapper mapper = new TournamentMapper();
+    private final TournamentMapper mapper;
+
+    public TournamentRepository(){
+        mapper = new TournamentMapper();
+    }
 
     public Tournament findById(Long id, Connection connection) {
         try {

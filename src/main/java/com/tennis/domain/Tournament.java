@@ -8,11 +8,11 @@ public class Tournament {
     private String name;
     private LocalDate startDate;
     private LocalDate endDate;
-    private TournamentRank rank;
+    private final TournamentRank rank;
     private Double entryFee;
     private Integer rankingRequirement;
     private TournamentStatus status;
-    private Integer participants;
+    private final Integer participants;
     private Long winnerId;
 
     public Tournament(TournamentRank rank){
@@ -56,7 +56,7 @@ public class Tournament {
     }
 
     public void cancel() {
-        this.status = TournamentStatus.CANCELLED;
+        if(status != TournamentStatus.COMPLETED) this.status = TournamentStatus.CANCELLED;
     }
 
     public Long getId() {
@@ -95,10 +95,6 @@ public class Tournament {
         return rank;
     }
 
-    public void setRank(TournamentRank rank) {
-        this.rank = rank;
-    }
-
     public Double getEntryFee() {
         return entryFee;
     }
@@ -117,10 +113,6 @@ public class Tournament {
 
     public Integer getParticipants() {
         return participants;
-    }
-
-    public void setParticipants(Integer participants) {
-        this.participants = participants;
     }
 
     public TournamentStatus getStatus() {

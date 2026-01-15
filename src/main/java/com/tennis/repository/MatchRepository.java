@@ -9,7 +9,11 @@ import java.util.List;
 
 @Repository
 public class MatchRepository {
-    private final MatchMapper mapper = new MatchMapper();
+    private final MatchMapper mapper;
+
+    public MatchRepository(){
+        this.mapper = new MatchMapper();
+    }
 
     public Match findById(Long id, Connection connection) {
         try {

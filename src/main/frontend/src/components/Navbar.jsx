@@ -1,36 +1,43 @@
 import {Link, useNavigate} from 'react-router-dom';
 import axios from 'axios';
+import '../styles/navbar.css'
 
 function Navbar({user,setUser}){
     const navigate = useNavigate();
 
     const logout = async () => {
         try{
-            await axios.post('api/users/logout');
+            await axios.post('/api/users/logout');
+            sessionStorage.removeItem('loggedUser');
             setUser(null);
-            navigate('/login');
+            navigate('/');
         } catch (e){
             console.error("Logout failed", e);
         }
     }
 
     return (
-        <nav style={{ background: '#333', color: '#fff', padding: '10px', display: 'flex', justifyContent: 'space-between' }}>
-            <div>
-                <Link to="/">Tennis Club</Link>
+        <nav className="navbar">
+            <div className="navbar-section left">
+                <Link to="/" className="nav-logo">TENNIS CLUB</Link>
             </div>
 
-            <div>
+            <div className="navbar-section center">
+                <Link to="/players" className="nav-link-main">Players</Link>
+                <Link to="/courts/filtered" className="nav-link-main">Courts</Link>
+                <Link to="/tournaments" className="nav-link-main">Tournaments</Link>
+            </div>
+
+            <div className="navbar-section right">
                 {user ? (
-                    <div>
-                        <span>Welcome, {user.firstName}!</span>
-                        <button onClick={logout}>Logout</button>
+                    <div className="user-info">
+                        <Link to={`/user/${user.id}`} className="nav-welcome">Hi, {user.firstName}!</Link>
+                        <button className="btn-logout" onClick={logout}>Logout</button>
                     </div>
                 ) : (
-                    <div>
-                        <Link to="/login">Log in</Link>
-                        <span> / </span>
-                        <Link to="/register">Register</Link>
+                    <div className="auth-links">
+                        <Link to="/login" className="nav-link-auth">Login</Link>
+                        <Link to="/register" className="btn-register">Register</Link>
                     </div>
                 )}
             </div>

@@ -20,16 +20,20 @@ import static com.tennis.util.BracketGenerator.seedPlayers;
 
 @Service
 public class TournamentService{
-    private final TournamentRepository tournamentRepository = new TournamentRepository();
-    private final MatchRepository matchRepository = new MatchRepository();
-    private final UserRepository userRepository = new UserRepository();
+    private final TournamentRepository tournamentRepository;
+    private final MatchRepository matchRepository;
+    private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
-    private final CourtRepository courtRepository = new CourtRepository();
+    private final CourtRepository courtRepository;
 
     private LocalDateTime lastCheck = LocalDateTime.MIN;
 
-    public TournamentService(ReservationRepository reservationRepository) {
-        this.reservationRepository = reservationRepository;
+    public TournamentService() {
+        this.reservationRepository = new ReservationRepository();
+        this.matchRepository = new MatchRepository();
+        this.userRepository = new UserRepository();
+        this.tournamentRepository = new TournamentRepository();
+        this.courtRepository = new CourtRepository();
     }
 
     public ApiResponse createTournament(CreateTournamentRequest request){
@@ -49,7 +53,6 @@ public class TournamentService{
             uow.flush();
 
             List<Match> matchDrafts = BracketGenerator.generateEmptyBracket(tournament.getParticipants(), tournament.getId(),uow);
-
             uow.commit();
 
             TournamentDraftDTO draftDTO = DTOMapper.toTournamentDraftDTO(tournament,matchDrafts);
@@ -67,14 +70,15 @@ public class TournamentService{
         UnitOfWork uow = null;
         try{
             uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
 
-            Tournament tournament = tournamentRepository.findById(tournamentId,uow.getConnection());
+            Tournament tournament = tournamentRepository.findById(tournamentId,conn);
             if(tournament == null) return new ApiResponse(false, "Tournament not found.");
             if(tournament.getStatus() != TournamentStatus.DRAFT){
                 return new ApiResponse(false, "Only draft tournaments can be finalized.");
             }
 
-            List<Match> matches = matchRepository.findByTournament(tournamentId,uow.getConnection());
+            List<Match> matches = matchRepository.findByTournament(tournamentId,conn);
 
             if (matches.isEmpty()) {
                 return new ApiResponse(false, "No matches generated for this tournament.");
@@ -87,23 +91,16 @@ public class TournamentService{
             }
 
             for(Match m : matches){
-                reservationRepository.confirmTournamentReservation(m.getId(),uow.getConnection());
+                reservationRepository.confirmTournamentReservation(m.getId(),conn);
             }
 
             tournament.setStatus(TournamentStatus.REGISTRATION_CLOSED);
 
-            LocalDateTime firstMatch = matches.stream()
-                    .map(Match::getScheduledTime)
-                    .min(LocalDateTime::compareTo)
-                    .orElseThrow(() -> new IllegalStateException("Matches exist but no start time found"));
-
-            LocalDateTime lastMatch = matches.stream()
-                    .map(Match::getScheduledTime)
-                    .max(LocalDateTime::compareTo)
-                    .orElseThrow(() -> new IllegalStateException("Matches exist but no end time found"));
-
-            tournament.setStartDate(firstMatch.toLocalDate());
-            tournament.setEndDate(lastMatch.toLocalDate());
+            LocalDate[] range = reservationRepository.getTournamentDateRange(tournamentId, conn);
+            if (range != null) {
+                tournament.setStartDate(range[0]);
+                tournament.setEndDate(range[1]);
+            }
 
             uow.registerDirty(tournament);
 
@@ -118,10 +115,14 @@ public class TournamentService{
         }
     }
 
-    public ApiResponse closeRegistrationForTournament(Tournament tournament){
-        Connection conn = null;
+    public ApiResponse closeRegistrationForTournament(Long tournamentId){
+        UnitOfWork uow = null;
         try{
-            conn = DatabaseConnection.getConnection();
+            uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
+
+            Tournament tournament = tournamentRepository.findById(tournamentId, conn);
+            if(tournament == null) return new ApiResponse(false, "Tournament not found");
 
             tournament.closeRegistration();
 
@@ -129,19 +130,27 @@ public class TournamentService{
                 return new ApiResponse(false, "Registration must be open for you to close it.");
             }
 
+            uow.registerDirty(tournament);
+            uow.commit();
+
             return new ApiResponse(true, "Registration is closed for " + tournament.getName());
 
         } catch (Exception e) {
+            if(uow != null) uow.rollback();
             return new ApiResponse(false, "Error: " + e.getMessage());
         } finally {
-            DatabaseConnection.returnConnection(conn);
+            if(uow != null) uow.finish();
         }
     }
 
-    public ApiResponse openRegistrationForTournament(Tournament tournament){
-        Connection conn = null;
+    public ApiResponse openRegistrationForTournament(Long tournamentId){
+        UnitOfWork uow = null;
         try{
-            conn = DatabaseConnection.getConnection();
+            uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
+
+            Tournament tournament = tournamentRepository.findById(tournamentId, conn);
+            if(tournament == null) return new ApiResponse(false, "Tournament not found");
 
             tournament.openRegistration();
 
@@ -149,28 +158,44 @@ public class TournamentService{
                 return new ApiResponse(false, "Registration must be closed for you to open it.");
             }
 
+            uow.registerDirty(tournament);
+            uow.commit();
+
             return new ApiResponse(true, "Registration is open for " + tournament.getName());
 
         } catch (Exception e) {
+            if(uow != null) uow.rollback();
             return new ApiResponse(false, "Error: " + e.getMessage());
         } finally {
-            DatabaseConnection.returnConnection(conn);
+            if(uow != null) uow.finish();
         }
     }
 
-    public ApiResponse cancelTournament(Tournament tournament){
-        Connection conn = null;
+    public ApiResponse cancelTournament(Long tournamentId){
+        UnitOfWork uow = null;
         try{
-            conn = DatabaseConnection.getConnection();
+            uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
+
+            Tournament tournament = tournamentRepository.findById(tournamentId, conn);
+            if(tournament == null) return new ApiResponse(false, "Tournament not found");
 
             tournament.cancel();
 
-            return new ApiResponse(true, "Registration is open for " + tournament.getName());
+            if(tournament.getStatus() != TournamentStatus.COMPLETED || tournament.getStatus() == TournamentStatus.CANCELLED){
+                return new ApiResponse(false, "You cannot cancel completed/cancelled tournament.");
+            }
+
+            uow.registerDirty(tournament);
+            uow.commit();
+
+            return new ApiResponse(true, "Cancelled tournament:  " + tournament.getName());
 
         } catch (Exception e) {
+            if(uow != null) uow.rollback();
             return new ApiResponse(false, "Error: " + e.getMessage());
         } finally {
-            DatabaseConnection.returnConnection(conn);
+            if(uow != null) uow.finish();
         }
     }
 
@@ -216,6 +241,7 @@ public class TournamentService{
             Connection conn = uow.getConnection();
 
             Tournament tournament = tournamentRepository.findByIdForUpdate(tournamentId, conn);
+            if (tournament == null) return new ApiResponse(false, "Tournament not found.");
             if (tournament.getStatus() != TournamentStatus.REGISTRATION_OPEN) {
                 return new ApiResponse(false, "Cannot withdraw after registration is closed.");
             }
@@ -238,21 +264,25 @@ public class TournamentService{
     }
 
     public ApiResponse getAllTournaments(){
-        this.closeTournamentAndSeedPlayers();
-        Connection conn = null;
+        UnitOfWork uow = null;
         try{
-            conn = DatabaseConnection.getConnection();
+            uow = UnitOfWorkFactory.create();
+            Connection conn = uow.getConnection();
+
+            closeTournamentAndSeedPlayers(uow);
             reservationRepository.cleanupExpiredHolds(conn);
 
             List<Tournament> tournaments = tournamentRepository.findAll(conn);
 
             List<TournamentListDTO> dtos = tournaments.stream().map(DTOMapper::toTournamentListDTO).toList();
 
+            uow.commit();
             return new ApiResponse(true, "OK", dtos);
         } catch (Exception e){
+            if (uow != null) uow.rollback();
             return new ApiResponse(false, "Error: " + e.getMessage());
         } finally {
-            DatabaseConnection.returnConnection(conn);
+            if (uow != null) uow.finish();
         }
     }
 
@@ -280,6 +310,17 @@ public class TournamentService{
 
             Tournament tournament = tournamentRepository.findById(tournamentId,conn);
             if(tournament == null) return new ApiResponse(false, "Tournament not found.");
+            if(tournament.getStatus() == TournamentStatus.REGISTRATION_CLOSED || tournament.getStatus() == TournamentStatus.REGISTRATION_OPEN){
+                if(!LocalDate.now().isBefore(tournament.getStartDate())){
+                    tournament.start();
+                }
+            }
+
+            if (tournament.getStatus() == TournamentStatus.DRAFT) {
+                List<Match> matches = matchRepository.findByTournament(tournamentId, conn);
+                TournamentDraftDTO draftDTO = DTOMapper.toTournamentDraftDTO(tournament, matches);
+                return new ApiResponse(true, "Draft loaded", draftDTO);
+            }
 
             int registeredParticipants = tournamentRepository.numberOfParticipants(tournamentId,conn);
 
@@ -303,6 +344,8 @@ public class TournamentService{
             dto.setMaxParticipants(tournament.getParticipants());
             dto.setCurrentUserRegistered(isRegistered);
             dto.setCurrentParticipants(registeredParticipants);
+            dto.setTournamentRank(tournament.getRank().name());
+            dto.setRankingRequirement(tournament.getRankingRequirement());
 
             dto.setParticipants(players.stream().map(DTOMapper::toPlayerDTO).toList());
 
@@ -311,7 +354,7 @@ public class TournamentService{
                         Player p1 = playerMap.get(match.getPlayer1Id());
                         Player p2 = playerMap.get(match.getPlayer2Id());
 
-                        return DTOMapper.toMatchDTO(match, p1, p2);
+                        return DTOMapper.toMatchDTO(match, p1, p2, tournament);
                     })
                     .toList();
 
@@ -374,8 +417,7 @@ public class TournamentService{
 
             // Check if end of adding scores - BO3
             if (match.getP1SetsWon() == 2 || match.getP2SetsWon() == 2) {
-                uow.commit();
-                return completeMatch(matchId);
+                completeMatch(match,conn,uow);
             }
 
             uow.commit();
@@ -388,99 +430,72 @@ public class TournamentService{
         }
     }
 
-    public ApiResponse completeMatch(Long matchId) {
-        UnitOfWork uow = null;
-        try {
-            uow = UnitOfWorkFactory.create();
-            Connection conn = uow.getConnection();
+    public void completeMatch(Match match, Connection conn, UnitOfWork uow) {
+        Tournament tournament = tournamentRepository.findById(match.getTournamentId(), conn);
 
-            Match match = matchRepository.findById(matchId, conn);
-            Tournament tournament = tournamentRepository.findById(match.getTournamentId(), conn);
+        match.getWinner();
+        Long winnerId = match.getWinnerId();
+        Long loserId = (winnerId.equals(match.getPlayer1Id())) ? match.getPlayer2Id() : match.getPlayer1Id();
 
-            match.getWinner();
-            Long winnerId = match.getWinnerId();
-            Long loserId = (winnerId.equals(match.getPlayer1Id())) ? match.getPlayer2Id() : match.getPlayer1Id();
+        // points for loser
+        Player loser = (Player) userRepository.findById(loserId, conn);
+        if (match.getPoints() != null) {
+            loser.addRankingPoints(match.getPoints());
+            uow.registerDirty(loser);
+        }
 
-            // points for loser
-            Player loser = (Player) userRepository.findById(loserId, conn);
-            if (match.getPoints() != null) {
-                loser.addRankingPoints(match.getPoints());
-                uow.registerDirty(loser);
-            }
+        uow.registerDirty(match);
 
-            // check if it was final
-            if (match.getNextMatchId() == null) {
-                Player tournamentWinner = (Player) userRepository.findById(winnerId, conn);
-                tournamentWinner.addRankingPoints(tournament.getRank().getBasePoints());
-                uow.registerDirty(tournamentWinner);
+        // check if it was final
+        if (match.getNextMatchId() == null) {
+            Player tournamentWinner = (Player) userRepository.findById(winnerId, conn);
+            tournamentWinner.addRankingPoints(tournament.getRank().getBasePoints());
+            uow.registerDirty(tournamentWinner);
 
-                // set winner in tournament
-                tournament.setWinnerId(winnerId);
-                tournament.setStatus(TournamentStatus.COMPLETED);
-                uow.registerDirty(tournament);
+            // set winner in tournament
+            tournament.setWinnerId(winnerId);
+            tournament.complete();
+            uow.registerDirty(tournament);
+        } else {
+            // not final => to next match
+            Match nextMatch = matchRepository.findById(match.getNextMatchId(), conn);
+
+            if (nextMatch.getPlayer1Id() == null) {
+                nextMatch.setPlayer1Id(winnerId);
             } else {
-                // not final => to next match
-                Match nextMatch = matchRepository.findById(match.getNextMatchId(), conn);
-
-                if (nextMatch.getPlayer1Id() == null) {
-                    nextMatch.setPlayer1Id(winnerId);
-                } else {
-                    nextMatch.setPlayer2Id(winnerId);
-                }
-                uow.registerDirty(nextMatch);
+                nextMatch.setPlayer2Id(winnerId);
             }
-
-            uow.registerDirty(match);
-            uow.commit();
-
-            return new ApiResponse(true, "Match finished. Winner moved forward.");
-        } catch (Exception e) {
-            if (uow != null) uow.rollback();
-            return new ApiResponse(false, "Error closing match: " + e.getMessage());
-        } finally {
-            if (uow != null) uow.finish();
+            uow.registerDirty(nextMatch);
         }
     }
 
-    private void closeTournamentAndSeedPlayers(){
+    private void closeTournamentAndSeedPlayers(UnitOfWork uow){
         if (lastCheck.isAfter(LocalDateTime.now().minusMinutes(10))) {
             return;
         }
 
-        UnitOfWork uow = null;
-        try {
-            uow = UnitOfWorkFactory.create();
-            Connection conn = uow.getConnection();
+        Connection conn = uow.getConnection();
 
-            LocalDate targetDate = LocalDate.now().plusDays(2);
-            List<Tournament> tournaments = tournamentRepository.findByStartDateAndStatus(
-                    targetDate, TournamentStatus.REGISTRATION_OPEN, conn);
+        LocalDate targetDate = LocalDate.now().plusDays(2);
+        List<Tournament> tournaments = tournamentRepository.findByStartDateAndStatus(
+                targetDate, TournamentStatus.REGISTRATION_OPEN, conn);
 
-            for (Tournament tournament : tournaments) {
-                List<Player> signedUpPlayers = userRepository.findByTournament(tournament.getId(), conn);
+        for (Tournament tournament : tournaments) {
+            List<Player> signedUpPlayers = userRepository.findByTournament(tournament.getId(), conn);
 
-                if (signedUpPlayers.size() < tournament.getParticipants()) {
-                    tournament.cancel();
-                    uow.registerDirty(tournament);
-                } else {
-                    List<Match> matches = matchRepository.findByTournament(tournament.getId(), conn);
+            if (signedUpPlayers.size() < tournament.getParticipants()) {
+                tournament.cancel();
+                uow.registerDirty(tournament);
+            } else {
+                List<Match> matches = matchRepository.findByTournament(tournament.getId(), conn);
 
-                    seedPlayers(signedUpPlayers, matches, uow);
+                seedPlayers(signedUpPlayers, matches, uow);
 
-                    tournament.setStatus(TournamentStatus.REGISTRATION_CLOSED);
-                    uow.registerDirty(tournament);
-                }
+                tournament.setStatus(TournamentStatus.REGISTRATION_CLOSED);
+                uow.registerDirty(tournament);
             }
-
-            uow.commit();
-
-            this.lastCheck = LocalDateTime.now();
-        } catch (Exception e) {
-            if (uow != null) uow.rollback();
-            System.err.println("Critical error in automated tournament processing: " + e.getMessage());
-        } finally {
-            if (uow != null) uow.finish();
         }
-    }
 
+        this.lastCheck = LocalDateTime.now();
+    }
 }

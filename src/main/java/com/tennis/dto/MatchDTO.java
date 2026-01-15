@@ -5,6 +5,7 @@ import java.util.List;
 public class MatchDTO {
     private Long id;
     private Integer round;
+    private String tournamentRoundText;
     private Long nextMatchId;
     private Long tournamentId;
     private boolean isReserved;
@@ -52,6 +53,14 @@ public class MatchDTO {
 
     public void setParticipants(List<MatchParticipantDTO> participants) {
         this.participants = participants;
+    }
+
+    public String getTournamentRoundText() {
+        return tournamentRoundText;
+    }
+
+    public void setTournamentRoundText(String tournamentRoundText) {
+        this.tournamentRoundText = tournamentRoundText;
     }
 }
 

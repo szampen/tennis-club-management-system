@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS reservations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE SET NULL,
-    CONSTRAINT uq_court_slot UNIQUE (court_id, start_time, end_time)
 ) CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS payments(
@@ -85,7 +84,7 @@ CREATE TABLE IF NOT EXISTS matches (
     scheduled_time DATETIME,
     p1_sets_won INT,
     p2_sets_won INT,
-    round INT NOT NULL
+    round INT NOT NULL,
     FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
     FOREIGN KEY (winner_id) REFERENCES users(id),
     FOREIGN KEY (player1_id) REFERENCES users(id),
@@ -93,3 +92,6 @@ CREATE TABLE IF NOT EXISTS matches (
     FOREIGN KEY (next_match_id) REFERENCES matches(id),
     FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE SET NULL
     ) CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO users (email, password, first_name, last_name, phone_number, user_type, ranking_points)
+VALUES ('admin@admin.com', '$2a$10$x5MdQOUwNifz5eeeQlU3yel00vHmUT9zYPibZN9p12uE7gjQZkxwG', 'Admin', 'Admin', '000000000', 'ADMIN', 0)

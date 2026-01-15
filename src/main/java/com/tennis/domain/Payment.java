@@ -24,6 +24,8 @@ public class Payment {
     public void refund(){
         if(this.status == PaymentStatus.COMPLETED){
             this.status = PaymentStatus.REFUNDED;
+            this.paymentDate = LocalDateTime.now();
+            this.transactionId = "TXN-" + System.currentTimeMillis();
         }
     }
 

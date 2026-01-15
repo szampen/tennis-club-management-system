@@ -2,17 +2,21 @@ package com.tennis.dto;
 
 import com.tennis.domain.Court;
 
-//TODO: might be useless, to implement later if needed
+import java.time.LocalDate;
+
 public class CourtDTO {
     private Long id;
     private String name;
     private Integer courtNumber;
     private String surfaceType;
-    private boolean hasRoof;
+    private Boolean hasRoof;
     private String location;
     private String imageUrl;
-    private boolean availableForReservations;
+    private Boolean availableForReservations;
     private Double pricePerHour;
+    private LocalDate firstAvailableDate;
+
+    public CourtDTO() {}
 
     public CourtDTO(Court court){
         this.id = court.getId();
@@ -46,11 +50,11 @@ public class CourtDTO {
         return courtNumber;
     }
 
-    public boolean isAvailableForReservations() {
+    public Boolean isAvailableForReservations() {
         return availableForReservations;
     }
 
-    public boolean isHasRoof() {
+    public Boolean isHasRoof() {
         return hasRoof;
     }
 
@@ -74,11 +78,11 @@ public class CourtDTO {
         this.surfaceType = surfaceType;
     }
 
-    public void setAvailableForReservations(boolean availableForReservations) {
+    public void setAvailableForReservations(Boolean availableForReservations) {
         this.availableForReservations = availableForReservations;
     }
 
-    public void setHasRoof(boolean hasRoof) {
+    public void setHasRoof(Boolean hasRoof) {
         this.hasRoof = hasRoof;
     }
 
@@ -96,5 +100,13 @@ public class CourtDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setFirstAvailableDate(LocalDate firstAvailableDate) {
+        this.firstAvailableDate = firstAvailableDate;
+    }
+
+    public LocalDate getFirstAvailableDate() {
+        return firstAvailableDate;
     }
 }

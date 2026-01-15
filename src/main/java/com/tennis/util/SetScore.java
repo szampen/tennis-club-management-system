@@ -1,8 +1,10 @@
 package com.tennis.util;
 
 public class SetScore {
-    private final int player1Games;
-    private final int player2Games;
+    private int player1Games;
+    private int player2Games;
+
+    public SetScore(){}
 
     public SetScore(int p1, int p2){
         this.player2Games = p2;
@@ -15,5 +17,13 @@ public class SetScore {
 
     public int getPlayer2Games() {
         return player2Games;
+    }
+
+    public void setPlayer1Games(int player1Games) {
+        this.player1Games = player1Games;
+    }
+
+    public void setPlayer2Games(int player2Games) {
+        this.player2Games = player2Games;
     }
 }

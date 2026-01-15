@@ -1,0 +1,235 @@
+.court-page-container {
+    display: flex;
+    height: calc(100vh - 70px); /* screen height minus navbar */
+    background-color: var(--wimbledon-cream);
+}
+
+/* Sidebar */
+.court-sidebar {
+    width: 300px;
+    background-color: var(--wimbledon-green);
+    color: white;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.btn-create-court {
+    background-color: var(--wimbledon-purple);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-weight: 800;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.filter-section h3 {
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-section label {
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 15px;
+}
+
+.filter-section select, .sort-select, .btn-direction {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    margin-top: 5px;
+}
+
+.btn-apply-filters {
+    width: 100%;
+    margin-top: 30px;
+    padding: 12px;
+    background-color: white;
+    color: var(--wimbledon-green);
+    border: none;
+    font-weight: bold;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+/* Main Content */
+.court-main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 40px;
+}
+
+.court-card {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    padding: 25px;
+    border-radius: 15px;
+    background: white;
+}
+
+.court-details {
+    flex: 1;
+}
+
+.court-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.c-number {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.roof-badge {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.info-item label {
+    font-size: 0.8rem;
+    color: #666;
+    display: block;
+}
+
+.info-item span {
+    font-weight: 600;
+}
+
+.date-highlight {
+    color: var(--wimbledon-purple);
+}
+
+.price-tag {
+    color: var(--wimbledon-green);
+    font-weight: 800 !important;
+}
+
+/* Actions */
+.court-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 220px;
+    justify-content: center;
+}
+
+.btn-book {
+    background-color: var(--wimbledon-green);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.btn-update {
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.delete-confirmation-inline {
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid #ff4444;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.warning-text {
+    color: #ff4444;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-confirm-final {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex: 1;
+    font-size: 0.8rem;
+}
+
+.btn-cancel-delete {
+    background: #666;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex: 1;
+    font-size: 0.8rem;
+}
+
+.sort-group {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    margin-top: 5px;
+}
+
+.sort-select {
+    flex: 1;
+    padding: 0 10px;
+    background-color: white;
+    color: #333;
+}
+
+.btn-direction {
+    width: 42px;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0;
+    color: #2e7d32;
+    transition: background-color 0.2s;
+}
+
+.btn-direction:hover {
+    background-color: #f5f5f5;
+}

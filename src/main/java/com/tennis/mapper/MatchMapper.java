@@ -115,7 +115,7 @@ public class MatchMapper implements DataMapper<Match> {
 
     public List<Match> findByPlayer(Long userId, Connection connection) throws SQLException, JsonProcessingException {
         List<Match> matches = new ArrayList<>();
-        String sql = "SELECT * FROM matches WHERE player1_id = ? OR player2_id = ? ";
+        String sql = "SELECT * FROM matches WHERE player1_id = ? OR player2_id = ? ORDER BY scheduled_time DESC";
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setLong(1, userId);
         statement.setLong(2, userId);

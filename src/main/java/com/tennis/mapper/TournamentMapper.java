@@ -13,7 +13,7 @@ public class TournamentMapper implements DataMapper<Tournament> {
 
     @Override
     public Long insert(Tournament tournament, Connection connection) throws SQLException {
-        String sql = "INSERT INTO tournaments (name, start_date, end_date, 'rank', entry_fee, ranking_requirement, status, winner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO tournaments (name, start_date, end_date, `rank`, entry_fee, ranking_requirement, status, winner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         setPreparedStatement(statement,tournament);
@@ -32,7 +32,7 @@ public class TournamentMapper implements DataMapper<Tournament> {
 
     @Override
     public void update(Tournament tournament, Connection connection) throws SQLException {
-        String sql = "UPDATE tournaments SET name = ?, start_date = ?, end_date = ?, 'rank' = ?, entry_fee = ?, ranking_requirement = ?, status = ?, winner_id = ? WHERE id = ?";
+        String sql = "UPDATE tournaments SET name = ?, start_date = ?, end_date = ?, `rank` = ?, entry_fee = ?, ranking_requirement = ?, status = ?, winner_id = ? WHERE id = ?";
 
         PreparedStatement statement = connection.prepareStatement(sql);
         setPreparedStatement(statement,tournament);
@@ -66,6 +66,9 @@ public class TournamentMapper implements DataMapper<Tournament> {
 
         Integer value = rs.getInt("ranking_requirement");
         if(!rs.wasNull()) tournament.setRankingRequirement(value);
+
+        Long winnerId = rs.getLong("winner_id");
+        if(!rs.wasNull()) tournament.setWinnerId(winnerId);
 
         return tournament;
     }
@@ -162,7 +165,6 @@ public class TournamentMapper implements DataMapper<Tournament> {
         else statement.setNull(8, Types.BIGINT);
     }
 
-    //TODO: i dont know if id's or objects are better
     public void insertParticipant(Long userId, Long tournamentId, Connection connection) throws SQLException{
         String sql = "INSERT INTO tournament_participants (user_id, tournament_id) VALUES (?, ?)";
 

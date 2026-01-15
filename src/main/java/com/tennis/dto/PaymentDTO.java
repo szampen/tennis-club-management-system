@@ -9,7 +9,6 @@ public class PaymentDTO {
 
     public PaymentDTO() {}
 
-    // Gettery i settery
     public Long getId() {
         return id;
     }

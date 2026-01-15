@@ -1,0 +1,134 @@
+.reservation-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.top-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.cancel-container {
+    display: flex;
+    align-items: center;
+}
+
+.btn-cancel-init {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.confirm-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fdf2f2;
+    padding: 5px 15px;
+    border-radius: 20px;
+    border: 1px solid #fab1a0;
+}
+
+.confirm-text {
+    color: #d63031;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.btn-confirm-yes {
+    background: #d63031;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.btn-confirm-no {
+    background: #95a5a6;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.btn-back {
+    background: none;
+    border: none;
+    color: var(--wimbledon-purple);
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: opacity 0.2s;
+}
+
+.btn-back:hover { opacity: 0.7; }
+
+.reservation-card {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    border-top: 8px solid var(--wimbledon-green);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--wimbledon-gray);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.card-header h2 {
+    color: var(--wimbledon-purple);
+    margin: 0;
+}
+
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+
+.status-badge.confirmed { background: #e6f4ea; color: var(--wimbledon-green); }
+.status-badge.pending { background: #fff4e5; color: #ff9800; }
+.status-badge.cancelled { background: #fce8e8; color: #d93025; }
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.info-section h3 {
+    font-size: 1.1rem;
+    color: var(--wimbledon-green);
+    border-bottom: 1px solid var(--wimbledon-gray);
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+
+.info-section p {
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+.payment-box {
+    grid-column: span 2;
+    background: var(--wimbledon-cream);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 4px;
+}

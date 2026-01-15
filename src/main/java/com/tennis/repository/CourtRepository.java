@@ -10,7 +10,11 @@ import java.util.List;
 
 @Repository
 public class CourtRepository {
-    private final CourtMapper mapper = new CourtMapper();
+    private final CourtMapper mapper;
+
+    public CourtRepository(){
+        this.mapper = new CourtMapper();
+    }
 
     public Court findById(Long id, Connection connection){
         try{
