@@ -37,7 +37,7 @@ const CourtList = ({ user }) => {
             const res = await axios.post(`/api/courts/filtered?t=${new Date().getTime()}`, payload);
             if (res.data && res.data.success) {
                 setCourts(res.data.data);
-                setInfo({message: res.data.message, isSuccess: true})
+                console.log(res.data.message);
             }
         } catch (err) {
             setInfo({ message: "Error loading courts", isSuccess: false });

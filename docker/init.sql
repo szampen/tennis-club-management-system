@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS reservations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (court_id) REFERENCES courts(id) ON DELETE SET NULL,
-    CONSTRAINT uq_court_slot UNIQUE (court_id, start_time, end_time)
 ) CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS payments(

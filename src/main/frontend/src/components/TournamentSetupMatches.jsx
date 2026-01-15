@@ -24,7 +24,7 @@ const TournamentSetupMatches = () => {
                 const hasUnreserved = tournamentData.matches.some(m => !m.reserved);
 
                 if (hasUnreserved && retryCount < 5) {
-                    alert("Waiting for database actualization.");
+                    console.log("Waiting for database actualization.");
                     setTimeout(() => fetchDraftData(retryCount + 1), 1000);
                 }
             }

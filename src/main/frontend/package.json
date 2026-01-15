@@ -49,14 +49,16 @@
     "files": [
       "dist/**/*",
       "main.js",
-      "package.json"
+      "package.json",
+      "backend.jar",
+      "resources/jre/**/*"
     ],
     "extraResources": [
       {
-        "from": "../../../target/backend.jar",
+        "from": "backend.jar",
         "to": "backend.jar"
       },
-      { "from": "../resources/jre", "to": "jre" }
+      { "from": "resources/jre", "to": "jre" }
     ]
   }
 }
