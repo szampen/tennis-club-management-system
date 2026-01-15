@@ -345,6 +345,7 @@ public class TournamentService{
             dto.setCurrentUserRegistered(isRegistered);
             dto.setCurrentParticipants(registeredParticipants);
             dto.setTournamentRank(tournament.getRank().name());
+            dto.setRankingRequirement(tournament.getRankingRequirement());
 
             dto.setParticipants(players.stream().map(DTOMapper::toPlayerDTO).toList());
 

@@ -113,6 +113,7 @@ const TournamentDetails = ({ user }) => {
 
                 <div className="filter-section">
                     <h3>Participation</h3>
+                    <p><strong>Points required:</strong> {data?.rankingRequirement}</p>
                     {data.status === 'REGISTRATION_OPEN' && (
                         data.currentUserRegistered ? (
                             <button onClick={() => handlePlayerAction('withdraw')} className="btn-delete w-full">
