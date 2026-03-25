@@ -1,100 +1,102 @@
-# Użyte wzorce architektoniczne
+# Architectural & Design Patterns
+
+This document outlines the architectural patterns implemented in the **Tennis Club Management System**.
+This project follows the principles of **Domain-Driven Design (DDD)** and **Enterprise Application Patterns** to ensure scalability, maintainability and data integrity.
 
 ## 1. Domain Model
-**Zastosowanie**: Cała logika biznesowa systemu (użytkownicy, turnieje, ranking, itd.)
 
-**Dlaczego**: Logika jest zlożona - turnieje z drabinkami, ranking oparty na wynikach, walidacja rezerwacji, zarządzanie płatnościami.
-Domain Model pozwolił na wykorzystanie dziedziczenia (`User` -> `Admin`,`Player`) i asocjacji między obiektami.
+**Application**: All core business logic (Users, Tournaments, Rankings, etc.)
 
-**Klasy**: `User`, `Court`, `Match`, `Payment`, `Reservation`, `Tournament`, `Player`, `Admin`
+**Why**: The system handles complex rules: automated tournament brackets, ranking-based registration and overlapping reservation checks. Using a Domain Model allows for rich object-oriented features like inheritance (`User` -> `Admin/Player`) and complex associations.
+
+**Classes**: `User`, `Tournament`, `Match`, `Reservation`, `Court`, `Payment`
 
 ## 2. Data Mapper
-**Zastosowanie**: Mapowanie obiektów dziedziny (np. `User`, `Tournament`, `Court`) na tabele BD. 
 
-**Dlaczego**: Złożony model dziedziny (relacje między użytkownikami, rezerwacjami, turniejami itd.), **Data Mapper** zapewnia niezaleźność modelu od struktury bazy danych.
+**Application**: Mapping domain objects (e.g., `User`, `Tournament`) to database tables. 
 
-**Klasy**: `UserMapper`, `MatchMapper`, `PaymentMapper`, `ReservationMapper`, `TournamentMapper`, `CourtMapper`
+**Why**: Data Mapper handles the transfer of data between objects and the database, while keeping them independent of one another. Complex domain model requires more scalable tools like this pattern.
+
+**Classes**: `UserMapper`, `MatchMapper`, `CourtMapper`, `ReservationMapper`
 
 ## 3. Repository
 
-**Zastosowanie**: Służy do enkapsulacji logiki dostępu do danych, udostępniając serwisom prosty interfejs do operowania na obiektach domenowych zamiast surowych zapytań SQL. Repozytorium pośredniczy między bazą danych a aplikacją, wykorzystując mappery do przekształcania rekordów z tabel na gotowe obiekty klas.
+**Application**: Encapsulating data access logic
 
-**Dlaczego**: Odizolowanie logiki biznesowej od szczegółów technicznych bazy danych. Kod dzięki temu jest bardziej czytelny i pozwala na wielokrotne używanie tych samych zapytań SQL w wielu miejscach.
+**Why**: It provides a clean, collection-like interface for the Service Layer. Instead of writing raw SQL in business logic, we interact with Repositories that use Mappers to return fully reconstituted domain objects.
 
-**Klasy**: `UserRepository`, `MatchRepository`, `PaymentRepository`, `ReservationRepository`, `TournamentRepository`, `CourtRepository`
+**Classes**: `UserRepository`, `ReservationRepository`, `CourtRepository`
 
 ## 4. Service Layer
 
-**Zastosowanie**: Centralny punkt koordynacji logiki biznesowej, integrując operacje na wielu repozytoriach jednocześnie. Odpowiada ona za walidację danych wejściowych, zarządzanie transakcjami przez `UnitOfWork` oraz mapowanie encji na obiekty `DTO` przed wysłaniem odpowiedzi do frontendu.
+**Application**: Central element of business logic, integrating operations on many Repositories simultaneously. Also Service Layer handles input data validation, orchestrating transactions using `Unit of Work` and mapping Entities to `DTO` objects, before sending them to frontend.
 
-**Dlaczego**: Uniknięcie skomplikowanej logiki w kontrolerach, czyni kod bardziej modularnym i łatwiejszym do testowania. Pozwala na zachowanie spójności danych.
+**Why**: Avoiding complicated logic in controllers, makes code more modular and easier to test. Allows to maintain data integrity.
 
-**Klasy**: `CourtService`, `ReservationService`, `TournamentService`, `UserService`
+**Classes**: `CourtService`, `ReservationService`, `UserService`
 
 ## 5. Unit of Work
 
-**Zastosowanie**: Służy do śledzenia wszystkich zmian wprowadzanych w obiektach (nowych, zmienionych lub usuniętych) podczas trwania jednej operacji biznesowej i zapewnia ich atomowy zapis w bazie danych.
+**Application**: Manages atomic transactions and database synchronization.
 
-**Dlaczego**: Gwarantuje spójność danych i uniknięcia sytuacji, w której tylko część operacji zostaje zapisana. Kod serwisu jest prostszy, bo `UnitOfWork` zarządza komendami typu `commit` i `rollback`
+**Why**: This is a crucial pattern for data integrity. The Unit of Work tracks all changes (new, dirty, deleted) during a single business transaction and ensures they are committed as a single unit (All-or-Nothing). 
 
-**Klasy**: `UnitOfWork`
+**Classes**: `UnitOfWork`
 
-## 6. Front Controller
+## 6. Data Transfer Object (DTO)
 
-**Zastosowanie**: Realizowany przy pomocy `DispatcherServlet` w Spring Boot, który odbiera każde żądanie HTTP wysyłane z frontendu i decyduje, do którego kontrolera je przydzielić.
+**Application**: Communication between frontend (React/Electron) and backend (Java).
 
-**Dlaczego**: Jeden spójny mechanizm zarządzania ruchem w całej aplikacji. Uporządkowanie przetwarzania żądań HTTP, gdzie mamy skomplikowaną logikę.
+**Why**: To prevent leaking sensitive information (like password hashes) and to decouple the API contract from the database schema. DTOs allows us to send precisely the data the UI needs.
 
-**Klasy**: `CourtController`, `ReservationController`, `TournamentController`, `UserController`
+**Classes**: `CreateReservationRequest`, `LoginRequest`, `TournamentDetailsDTO`
 
-## 7. DTO (Data Transfer Object)
+## 7. Front Controller
 
-**Zastosowanie**: Wzorzec ten służy do przesyłania danych między frontendem (React/Electron) a backendem (Java) w ustrukturyzowanej formie, która jest niezależna od tabel w bazie danych.
+**Application**: Implemented with help of `DispatcherServlet` in **Spring Boot*, which receives every HTTP request send from frontend and decides to which controller it should go to.
 
-**Dlaczego**: Użyty, żeby zwiększyć bezpieczeństwo i uniknąć przesyłania całych obiektów domenowych, które mogą zawierać wrażliwe dane (np. hasła użytkowników w klasie `User`). Dzięki DTO można dowolnie kształtować strukturę danych wysyłanych do interfejsu, łącząc informacje z różnych tabel bez konieczności zmiany modelu bazy danych.
+**Why**: One coherent mechanism managing traffic in the whole application.  
 
-**Klasy**: np. `CreateReservationRequest`, `LoginRequest`, `TournamentDetailsDTO`
+**Classes**: `CourtController`, `ReservationController`, `TournamentController`
 
 ## 8. Pessimistic Offline Lock
 
-**Zastosowanie**: Służy do blokowania dostępu do zasobu (np. konkretnego terminu na korcie) na czas trwania sesji biznesowej, która wykracza poza jedną transakcję bazy danych.
+**Application**: Preventing concurrent modification during critical operations.
+ 
+**Why**: Used during tournament bracket generation and score updates. It ensures that two administrators cannot modify the same tournament state simultaneously, maintaining system consistency.
 
-**Dlaczego**: Zastosowano to rozwiązanie, aby zapobiec konfliktom podczas krytycznych operacji, takich jak zapisywanie się graczy na turniej lub aktualizacja wyników meczów. Dzięki blokadzie na poziomie bazy danych jest pewność, że system zachowa spójność i nie pozwoli na jednoczesną edycję tego samego turnieju przez dwóch różnych administratorów lub użytkowników.
-
-**Klasy**: `TournamentMapper`
+**Classes**: `TournamentMapper`
 
 ## 9. Identity Field
 
-**Zastosowanie**: Wzorzec ten polega na przechowywaniu klucza głównego z bazy danych (`id`) bezpośrednio w obiektach aplikacji. W bazie danych MySQL każda tabela posiada kolumnę id BIGINT AUTO_INCREMENT PRIMARY KEY, która jest mapowana na pole Long id w Javie.
+**Application**: Storing primary key from the DB in application entities. Each table has id column, mapping directly to `Long id` field in Java.
 
-**Dlaczego**: Zastosowano go, aby zachować spójność tożsamości między światem obiektowym a relacyjnym. Dzięki temu aplikacja dokładnie wie, który wiersz w bazie danych odpowiada konkretnemu obiektowi w pamięci,
+**Why**: Maintain integrity between 
 
-**Klasy**: każda tabela w bazie danych MySQL (`init.sql`)
+**Classes**: every table in the database 
 
-## 9. Foreign Key Mapping
+## 10. Foreign Key Mapping
 
-**Zastosowanie**: Wzorzec ten mapuje relacje między obiektami za pomocą kluczy obcych w bazie. Powiązania (`Reservation` -> `User`,`Court`) - tabela `reservations` posiada `userId` i `courtId`
+**Application**: Mapping relations between objects using foreign keys in the DB. 
 
-**Dlaczego**: Łatwe odszukiwanie powiązanych obiektów.
+**Why**: Easier search for related objects.
 
-**Klasy**: tabele w bazie danych MySQL (`init.sql`), np. `reservations`, `payments`
-
-## 10. Association Table Mapping
-
-**Zastosowanie**: Wzorzec ten służy do obsługi relacji "wiele do wielu" poprzez stworzenie dodatkowej tabeli łączącej.
-
-**Dlaczego**: Relacja wiele do wielu w bazach SQL bez dublowania danych. Elastyczne zarządzanie uczestnikami turniejów
-
-**Klasy**: tabela `tournament_participants` w bazie danych
+**Classes**: `reservations`, `payments` tables in database
 
 ## 11. Single Table Inheritance
 
-**Zastosowanie**: Wzorzec ten polega na przechowywaniu całej hierarchii klas (`User` -> `Admin`,`Player`) w jednej, wspólnej tabeli bazy danych o nazwie `users`. Rozróżnienie za pomocą kolumny typu discriminator – pole `user_type (ENUM: 'ADMIN', 'PLAYER')`.
+**Application**: Mapping the `User` hierarchy to database.
 
-**Dlaczego**: Struktura danych dla admina i gracza jest bardzo podobna, a różnią się oni głównie uprawnieniami i dodatkowymi polami (jak `ranking_points`).
+**Why**: Since `Admin` and `Player` share most attributes (email, name, password) and differ mainly in permissions and ranking data, they are stored in a single `users` table with a `user_type` discriminator column (ENUM).
 
-**Klasy**: tabela `users` w bazie danych
+**Classes**: `users` table in database
 
+## 12. Association Table Mapping
 
+**Application**: Creation of additional table connecting two related tables - handling Many-to-Many relationships.
+
+**Why**: Many-to-Many relationship without duplication of data. Elastic management of tournament participants.
+
+**Classes**: `tournament_participants` table in database
 
 
