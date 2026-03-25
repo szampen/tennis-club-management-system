@@ -48,13 +48,17 @@ This project utilizes a layered architecture with specific design patterns (for 
 To run application locally without building from source:
 
 1. Clone or download the repository
-2. Start the MySQL database container. Navigate to `/docker` folder and run:
+   ```bash
+   git clone https://github.com/szampen/tennis-club-management-system.git
+   cd tennis-club-management-system
+   ```
+3. Start the MySQL database container. Navigate to `/docker` folder and run:
     ```bash
     docker-compose up -d
     ```
    (This automatically initializes the database using `init.sql` and creates an `ADMIN` user)
-3. Download and run the `Tennis Club Manager.exe` file from the latest release.
-4. The app will automatically connect to the local database. You can register a new account or log in.
+4. Download and run the `Tennis Club Manager.exe` file from the latest release.
+5. The app will automatically connect to the local database. You can register a new account or log in.
 
 ## Local Development & Build Instructions
 
