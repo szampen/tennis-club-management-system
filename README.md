@@ -43,8 +43,6 @@ This project utilizes a layered architecture with specific design patterns (for 
 - **Club Management:** Full power to add, edit or close the courts for players.
 - **Tournament Orchestration:** Admins define tournament rules, set ranking requirements, schedule timeslots for matches and enter final results.
 
-## Screenshots
-
 ## Quick Setup
 
 To run application locally without building from source:
